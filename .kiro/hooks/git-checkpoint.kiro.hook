@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Git Checkpoint Before Changes",
+  "description": "Automatically commits all staged and unstaged changes as a checkpoint before the agent writes any files, so you can always roll back.",
+  "version": "1",
+  "when": {
+    "type": "preToolUse",
+    "toolTypes": [
+      "write"
+    ]
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "git add -A && git diff --cached --quiet || git commit -m \"checkpoint: auto-save before agent changes\""
+  }
+}
