@@ -207,3 +207,43 @@ sequenceDiagram
 - Support tool subset selection via `tool_names` parameter
 - Extract chain-of-thought from Ollama's `reasoning_content` / `message.thinking` fields
 - Format ReAct steps into human-readable thinking trace for the UI side panel
+
+### Component 3: Ollama LLM Integration (`core/llm.py`, `core/models.py`, `core/config.py`)
+
+**Purpose**: Factory layer that creates LangChain `ChatOllama` instances for any Ollama model. Centralizes model resolution, host configuration, and sampling parameter mapping.
+
+**LLM Factory** (`core/llm.py`):
+
+```mermaid
+sequenceDiagram
+    participant Caller as Chat / Agent
+    participant Factory as get_llm()
+    participant Config as core/config.py
+    participant Ollama as ChatOllama
+
+    Caller->>Factory: get_llm(model_id, timeout, **kwargs)
+    Factory->>Config: get_default_model_id() [if model_id is None]
+    Factory->>Factory: Strip "ollama:" prefix, default to "llama3.2"
+    Factory->>Config: get_ollama_host()
+    Factory->>Ollama: ChatOllama(model, base_url, timeout, **kwargs)
+    Ollama-->>Caller: BaseChatModel instance
+```
+
+**Model Resolution**:
+- Input formats: `"ollama:llama3.2"`, `"llama3.2"`, `""` (empty)
+- Strips `ollama:` prefix (case-insensitive)
+- Falls back to `"llama3.2"` if empty after stripping
+- Two default models configured:
+  - `DEFAULT_MODEL` = `"ollama:llama3.2"` — used for all chat panels
+  - `AGENTIC_MODEL` = `"qwen3:0.6b"` — used for agentic panel (supports `reasoning=True` for CoT)
+
+**Model Router** (`core/models.py`):
+- `generate(prompt, model_id, options, messages)` — single entry point for non-agentic chat
+- Maps request options to ChatOllama kwargs: `temperature`, `top_k`, `top_p`, `repeat_penalty`, `num_predict`/`max_tokens`
+- Converts message dicts to LangChain `SystemMessage`/`HumanMessage`/`AIMessage`
+- Returns `{"text": str, "thinking": ""}` (thinking field reserved but unused for standard chat)
+
+**Configuration** (`core/config.py`):
+- Loads `.env` via `python-dotenv` (lazy, on first access)
+- Key environment variables: `DEFAULT_MODEL`, `AGENTIC_MODEL`, `OLLAMA_HOST`, `PORT`, `EMBEDDING_BACKEND`, `EMBEDDING_MODEL`
+- All getters have sensible defaults; no required env vars for basic operation
