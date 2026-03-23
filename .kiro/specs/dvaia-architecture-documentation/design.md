@@ -431,3 +431,105 @@ Each RAG chunk is stored as a Qdrant point:
 | `payload.created_at` | ISO 8601 string | Insertion timestamp |
 
 Collection config: cosine distance, dimension auto-detected from first embedding.
+
+## Error Handling
+
+### Error Scenario 1: Ollama Unavailable
+
+**Condition**: Ollama service is down or unreachable at `OLLAMA_HOST`
+**Response**: `ChatOllama.invoke()` raises connection error; Flask returns `{"error": "<message>"}` with HTTP 500
+**Recovery**: No retry logic. User must ensure Ollama is running (`docker compose up ollama`)
+
+### Error Scenario 2: Qdrant Unavailable
+
+**Condition**: Qdrant service is down or collection does not exist
+**Response**: Vector store methods catch all exceptions and return empty lists/results. RAG search silently returns no chunks rather than failing
+**Recovery**: Graceful degradation — chat works without RAG context. Collection auto-created on next `add_point()`
+
+### Error Scenario 3: Embedding Failure
+
+**Condition**: `embed_text()` returns empty vector (Ollama embedding model not loaded or text is empty)
+**Response**: `add_chunk()` raises `RuntimeError("Could not embed chunk")`. Search returns empty results
+**Recovery**: Ensure `nomic-embed-text` model is pulled in Ollama
+
+### Error Scenario 4: Document Extraction Failure
+
+**Condition**: Missing optional dependency (PyPDF2, python-docx, pytesseract) or corrupt file
+**Response**: `extract_text()` catches all exceptions and returns empty string. Document is stored but has no extracted text
+**Recovery**: Install missing dependency and re-fetch document (lazy extraction retries on next `get_document()`)
+
+### Error Scenario 5: Agent Max Steps Exceeded
+
+**Condition**: ReAct agent reaches `max_steps` (default 15) without producing a final answer
+**Response**: Returns last AIMessage content or fallback text "Agent stopped (max steps or no final answer)"
+**Recovery**: User can increase `max_steps` (up to 50) or simplify the prompt
+
+## Security Considerations (Intentional Vulnerabilities)
+
+This application is vulnerable by design. The following are documented intentional weaknesses, not bugs:
+
+| Vulnerability | Location | Mechanism |
+|---|---|---|
+| Direct Prompt Injection | `/api/chat` | User prompt sent directly to LLM with no filtering |
+| Document Injection | `/api/chat` + `context_from=upload` | Extracted document text prepended to prompt without sanitization |
+| Web/SSRF Injection | `/api/chat` + `context_from=url` | Any HTTP/HTTPS URL fetched; content prepended to prompt |
+| RAG Poisoning | `/api/rag/chunks` POST | Arbitrary text chunks added to vector store without validation |
+| Template Injection | `/api/chat-with-template` | `{{user_input}}` replaced via string substitution, no escaping |
+| Agentic Tool Abuse | `/api/agent/chat` | Tools have no auth checks; `delete_document_by_id` is destructive |
+| Weak Password Hashing | `app/auth.py` | SHA256 without salt |
+| No CSRF Protection | All POST endpoints | Flask session with no CSRF token validation |
+| Hardcoded Secrets | `app/config.py` | Default `SECRET_KEY = "dev-secret-change-in-production"` |
+| Static MFA Codes | `app/db.py` seed | MFA code `123456`, backup codes `backup1`/`backup2`/`backup3` |
+
+## Testing Strategy
+
+### Unit Testing Approach
+
+Since this is a documentation-only spec of an existing vulnerable-by-design application, testing focuses on verifying that the documented architecture accurately reflects the codebase:
+- Verify route existence and HTTP methods match the documented API table
+- Verify database schema matches documented ER diagram (table names, columns)
+- Verify agent tool names and count match documentation
+- Verify configuration defaults match documented values
+
+### Integration Testing Approach
+
+- End-to-end flows (chat, agent, RAG pipeline) require running Ollama and Qdrant services
+- Docker Compose provides the full integration environment
+- Each attack panel can be exercised independently via its API endpoint
+
+## Dependencies
+
+### Python Packages (from `requirements.txt`)
+
+| Package | Purpose |
+|---|---|
+| `flask` >= 3.0.0 | Web framework and HTTP server |
+| `gunicorn` >= 21.0.0 | Production WSGI server |
+| `curl_cffi` >= 0.7.0 | Browser-impersonating HTTP client (URL fetcher) |
+| `python-dotenv` | `.env` file loading |
+| `langchain` >= 0.3.0 | LLM orchestration framework |
+| `langchain-core` >= 0.3.0 | Core LangChain abstractions |
+| `langchain-community` >= 0.3.0 | Community integrations |
+| `langchain-ollama` >= 0.2.0 | Ollama chat and embedding models |
+| `qdrant-client` | Qdrant vector database client |
+| `PyPDF2` | PDF text extraction |
+| `python-docx` | DOCX text extraction |
+| `pytesseract` | OCR for image text extraction |
+| `Pillow` | Image processing (payloads + OCR) |
+| `reportlab` | PDF generation (payloads) |
+| `qrcode` | QR code generation |
+| `numpy`, `scipy` | Audio signal generation |
+| `gTTS`, `pydub` | Text-to-speech audio generation |
+| `Faker` | Realistic dummy data for CSV payloads |
+
+### External Services
+
+| Service | Image | Port | Purpose |
+|---|---|---|---|
+| Ollama | `ollama/ollama:latest` | 11434 | Local LLM inference + embeddings |
+| Qdrant | `qdrant/qdrant:latest` | 6333 | Vector similarity search for RAG |
+
+### System Dependencies
+
+- `tesseract-ocr`: Required on host/container for pytesseract image OCR
+- `ffmpeg`: Required on PATH for pydub audio format conversion (TTS payloads)
