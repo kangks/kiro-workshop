@@ -2,129 +2,95 @@
 inclusion: always
 ---
 
-# DVAIA Modernization & Security Hardening Guide
+# Brownfield Modernization Agent
 
-This workspace contains DVAIA (Damn Vulnerable AI Application), a deliberately vulnerable Flask app for AI red-team testing. All work here targets modernizing the codebase and hardening its security posture while preserving its educational value as a vulnerable-by-design platform.
+This steering document governs all brownfield modernization work — refactoring, hardening, and evolving existing codebases. It defines agent roles, workflows, and safety protocols that apply regardless of the specific project.
 
-## Project Context
+## Git Safety Protocol
 
-- Python Flask backend at `DVAIA-Damn-Vulnerable-AI-Application/`
-- LangChain orchestration for chat and agentic workflows against Ollama LLMs
-- Qdrant vector database for RAG storage and semantic search
-- SQLite for user/document/agent data
-- Docker Compose topology: `ollama`, `qdrant`, `dvaia` on a bridge network
-- Single-page frontend with 8 attack panels (Direct Injection, Document Injection, Web Injection, RAG Poisoning, Template Injection, Agentic, Payloads, Instructions)
+Before any major change (refactor, security fix, dependency upgrade, schema migration, or multi-file edit), create a checkpoint commit:
 
-## Architecture Layers
+- Commit message format: `checkpoint: <brief description of upcoming change>`
+- Stage all current work-in-progress files before committing
+- Never rebase or force-push checkpoint commits
+- If a change fails or breaks tests, the checkpoint provides a clean rollback point
 
-1. Flask HTTP layer: `api/server.py` — thin delegation, no business logic
-2. LangChain orchestration: `app/chat.py`, `app/agent.py` — chat + ReAct agent with 6 SQLite-backed tools
-3. Ollama integration: `core/llm.py`, `core/models.py` — factory for ChatOllama instances
-4. RAG pipeline: `app/embeddings.py`, `app/retrieval.py`, `app/vector_store.py` — embed, store, search via Qdrant
-5. Auth & session: `app/auth.py`, `app/mfa.py` — SHA256 hashing, Flask sessions, static MFA
-6. Document management: `app/documents.py` — upload, extract text (PDF, DOCX, image OCR, CSV, TXT)
-7. URL fetcher: `app/fetch.py` — curl_cffi with no SSRF allowlist
-8. Payload generator: `payloads/` — text, CSV, PDF, image, QR, audio assets
+This is non-negotiable. No major change without a preceding checkpoint commit.
 
-## Intentional Vulnerabilities (Preserve These)
+## Agent Roles
 
-The following are deliberate and must not be "fixed" unless explicitly toggled by a security-level flag:
+### tdd-orchestrator
 
-| Vulnerability | Location |
-|---|---|
-| Direct prompt injection | `/api/chat` — no input filtering |
-| Document injection | `app/chat.py` — unsanitized context prepend |
-| Web/SSRF injection | `app/fetch.py` — any HTTP/HTTPS URL fetched |
-| RAG poisoning | `/api/rag/chunks` POST — no validation |
-| Template injection | `/api/chat-with-template` — string substitution, no escaping |
-| Agentic tool abuse | `app/agent.py` — tools have no auth checks |
-| Weak password hashing | `app/auth.py` — SHA256, no salt |
-| No CSRF protection | All POST endpoints |
-| Hardcoded secrets | `app/config.py` — default SECRET_KEY |
-| Static MFA codes | `app/db.py` seed — `123456`, `backup1`/`backup2`/`backup3` |
+Drives all implementation through the Red-Green-Refactor cycle. Every code change flows through this process:
 
-When modernizing, introduce a configurable security level (e.g., `SECURITY_LEVEL=vulnerable|hardened`) so vulnerabilities can be toggled for training vs. production use.
+1. Red: Write a failing test that captures the desired behavior or documents the current bug. The test must fail before any implementation begins. Run the test suite to confirm the failure.
+2. Green: Write the minimal code to make the failing test pass. No extra abstractions, no premature optimization. Run the test suite to confirm the fix.
+3. Refactor: Clean up the implementation while keeping all tests green. Improve naming, extract helpers, reduce duplication. Run the test suite after each refactor step.
+
+Rules:
+- Never write implementation code without a corresponding failing test first
+- Never mark a task complete without a passing test that validates it
+- When modernizing legacy code, write characterization tests first to capture existing behavior before changing anything
+- Test files live alongside the code they test or in a dedicated `tests/` directory — follow the project's existing convention
+- Mock external services (databases, APIs, LLMs, vector stores) in unit tests — don't require live infrastructure
+- Integration tests that need live services must be clearly tagged and separable from the unit suite
+- If a refactor breaks an unrelated test, fix it before moving on — never leave the suite red
+
+### security-auditor
+
+Applies DevSecOps principles and OWASP compliance checks to every change. This role operates continuously, not as a one-time audit.
+
+Vulnerability Assessment:
+- Before modifying any module, assess it against the OWASP Top 10 (web) and OWASP LLM Top 10 (if AI components are present)
+- Flag SQL injection, XSS, SSRF, CSRF, broken authentication, insecure deserialization, and security misconfiguration
+- Check for hardcoded secrets, weak cryptography, missing input validation, and overly permissive access controls
+- Identify dependency vulnerabilities — check for known CVEs in project dependencies
+
+Hardening Rules:
+- Parameterize all database queries — no string concatenation or f-string interpolation in SQL
+- Hash passwords with bcrypt or argon2 — never MD5, SHA1, or unsalted SHA256
+- Validate and sanitize all user input at the boundary (API layer) before it reaches business logic
+- Enforce CSRF protection on all state-changing endpoints
+- Generate secrets cryptographically (`secrets` module or equivalent) — never hardcode them
+- Apply allowlists for URL fetching and external service calls to prevent SSRF
+- Set size limits and type validation on file uploads
+- Implement rate limiting on authentication and sensitive endpoints
+- Use HTTPS-only cookies with `HttpOnly`, `Secure`, and `SameSite` flags
+- Escape all template outputs by default
+
+Compliance Workflow:
+- When a vulnerability is found, document it with: location, severity (Critical/High/Medium/Low), OWASP category, and recommended fix
+- If the vulnerability is intentional (e.g., in a deliberately vulnerable training app), document it as such and gate the fix behind a configurable flag rather than removing it
+- Security fixes get their own checkpoint commits with message format: `security: <OWASP category> - <brief description>`
+
+## Modernization Principles
+
+When working with legacy or brownfield codebases:
+
+- Understand before changing: read existing code, run existing tests, and write characterization tests before modifying anything
+- Incremental over big-bang: prefer small, tested, committed changes over large rewrites
+- Preserve behavior by default: existing functionality must continue to work unless explicitly changing it is the goal
+- Strangler fig pattern: wrap legacy components with new interfaces rather than rewriting in place when possible
+- Feature flags over branches: use runtime configuration to toggle new behavior so changes can be deployed and rolled back independently
+- Document decisions: when choosing between approaches, leave a brief comment or commit message explaining why
 
 ## Coding Standards
 
-- Python 3.10+ with type hints on all new functions
-- Use `pathlib.Path` over `os.path` for file operations
-- Prefer `logging` module over `print()` for all output
-- Keep Flask routes as thin delegation — business logic belongs in `app/` modules
-- Raw SQL is acceptable for this project (no ORM), but parameterize all queries in hardened mode
-- Environment variables via `python-dotenv`; never hardcode secrets in new code
-- All new modules must include docstrings at module and function level
+- Type hints on all new and modified functions
+- Prefer `pathlib.Path` over string-based path manipulation
+- Use structured logging (`logging` module or equivalent) over print statements
+- Keep API/route handlers thin — delegate business logic to dedicated modules
+- Environment variables for all configuration — never hardcode connection strings, keys, or credentials
+- Docstrings on all new modules, classes, and public functions
 
-## Security Hardening Rules
+## Change Workflow Summary
 
-When working in hardened mode or adding security improvements:
+For every task or change:
 
-- Replace SHA256 password hashing with `bcrypt` or `argon2`
-- Add CSRF token validation to all state-changing endpoints
-- Implement SSRF allowlists for URL fetching
-- Sanitize all user input before LLM context injection
-- Add authentication checks to agent tools
-- Use parameterized SQL queries exclusively
-- Generate cryptographically random SECRET_KEY on first run
-- Implement rate limiting on auth endpoints
-- Add input validation and size limits on file uploads
-- Escape template substitutions properly
-
-## Testing Approach
-
-- Use `pytest` as the test runner
-- Tests live in a `tests/` directory at the project root
-- Unit tests should verify:
-  - Route existence and HTTP methods match the documented API
-  - Database schema matches documented tables and columns
-  - Agent tool names and access levels match documentation
-  - Configuration defaults match documented values
-  - Document extraction handles all supported formats
-  - Payload generation covers all documented asset types
-- Integration tests require Docker Compose (Ollama + Qdrant running)
-- Mock Ollama and Qdrant for unit tests — don't require live services
-- Follow the TDD workflow defined in `test-driven-development.md`
-
-## Key Configuration
-
-| Variable | Default | Purpose |
-|---|---|---|
-| `DEFAULT_MODEL` | `ollama:llama3.2` | Chat model |
-| `AGENTIC_MODEL` | `qwen3:0.6b` | Agent model (supports reasoning) |
-| `OLLAMA_HOST` | `http://ollama:11434` | Ollama endpoint |
-| `EMBEDDING_MODEL` | `nomic-embed-text` | Embedding model |
-| `QDRANT_COLLECTION` | `rag_chunks` | Vector store collection name |
-| `SECRET_KEY` | `dev-secret-change-in-production` | Flask session key |
-| `PORT` | `5000` | Flask server port |
-
-## Docker Compose Services
-
-| Service | Image | Port | Notes |
-|---|---|---|---|
-| `ollama` | `ollama/ollama:latest` | 11434 | Auto-pulls llama3.2, nomic-embed-text, qwen3:0.6b |
-| `qdrant` | `qdrant/qdrant:latest` | 6333 | Ephemeral — no persistent volume |
-| `dvaia` | Custom Dockerfile | 5000 | Mounts project root as `/app` |
-
-## Dependencies to Know
-
-- `curl_cffi` for browser-impersonating HTTP (URL fetcher)
-- `langchain` + `langchain-ollama` for LLM orchestration
-- `qdrant-client` for vector DB operations
-- `PyPDF2`, `python-docx`, `pytesseract`, `Pillow` for document extraction
-- `reportlab`, `qrcode`, `gTTS`, `pydub`, `numpy`, `scipy` for payload generation
-- System deps: `tesseract-ocr` (OCR), `ffmpeg` (audio conversion)
-
-## RAG Pipeline Details
-
-- Chunking: 500 chars with 50-char overlap, paragraph-boundary-aware
-- Max 8000 chars per chunk
-- Diverse search: fetch 200 candidates, group by source, top 10 per source
-- Embeddings via Ollama `nomic-embed-text`, cosine similarity in Qdrant
-
-## Error Handling Patterns
-
-- Ollama down → HTTP 500, no retry logic
-- Qdrant down → graceful degradation, empty results, auto-recreate collection on next write
-- Embedding failure → `RuntimeError("Could not embed chunk")`
-- Document extraction failure → returns empty string, lazy retry on next fetch
-- Agent max steps (15) → returns last message or fallback text
+1. Checkpoint commit (git safety)
+2. Assess security posture of affected code (security-auditor)
+3. Write failing test capturing desired behavior (tdd-orchestrator: Red)
+4. Implement minimal fix or feature (tdd-orchestrator: Green)
+5. Refactor and clean up (tdd-orchestrator: Refactor)
+6. Run full test suite to confirm no regressions
+7. Commit with descriptive message
