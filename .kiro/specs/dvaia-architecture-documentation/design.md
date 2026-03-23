@@ -533,3 +533,56 @@ Since this is a documentation-only spec of an existing vulnerable-by-design appl
 
 - `tesseract-ocr`: Required on host/container for pytesseract image OCR
 - `ffmpeg`: Required on PATH for pydub audio format conversion (TTS payloads)
+
+
+## Correctness Properties
+
+*A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+
+### Property 1: Route completeness
+
+*For any* route registered in the Flask application (`api/server.py`), the Architecture Documentation SHALL list that route with its HTTP method and URL path.
+
+**Validates: Requirement 1.1**
+
+### Property 2: Agent tool documentation completeness
+
+*For any* tool defined in `ALL_AGENT_TOOLS` in `app/agent.py`, the Architecture Documentation SHALL list that tool by name and specify its access level (read or write) and behavior description.
+
+**Validates: Requirements 3.1, 3.2**
+
+### Property 3: Document extraction format completeness
+
+*For any* file extension handled by `extract_text()` in `app/documents.py`, the Architecture Documentation SHALL list that format and its extraction library.
+
+**Validates: Requirement 7.2**
+
+### Property 4: Payload type documentation completeness
+
+*For any* payload asset type supported by the `/api/payloads/generate` endpoint, the Architecture Documentation SHALL list that type with its generating module and output format.
+
+**Validates: Requirements 9.1, 9.2**
+
+### Property 5: Database schema documentation completeness
+
+*For any* table defined in the `_SCHEMA` SQL in `app/db.py`, the Architecture Documentation SHALL document that table and list all of its columns with types and constraints.
+
+**Validates: Requirements 10.1, 10.2**
+
+### Property 6: Docker Compose service completeness
+
+*For any* service defined in `docker-compose.yml`, the Architecture Documentation SHALL document that service with its image, port mapping, and purpose.
+
+**Validates: Requirement 11.1**
+
+### Property 7: Vulnerability documentation completeness
+
+*For any* intentional vulnerability in the DVAIA codebase, the Architecture Documentation SHALL document that vulnerability class, reference the specific source file or API endpoint where it exists, and describe the mechanism that makes it exploitable.
+
+**Validates: Requirements 12.1, 12.2, 12.3**
+
+### Property 8: Python dependency completeness
+
+*For any* package listed in `requirements.txt`, the Architecture Documentation SHALL list that package and describe its purpose in the system.
+
+**Validates: Requirement 14.1**
