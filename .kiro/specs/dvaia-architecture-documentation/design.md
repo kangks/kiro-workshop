@@ -247,3 +247,76 @@ sequenceDiagram
 - Loads `.env` via `python-dotenv` (lazy, on first access)
 - Key environment variables: `DEFAULT_MODEL`, `AGENTIC_MODEL`, `OLLAMA_HOST`, `PORT`, `EMBEDDING_BACKEND`, `EMBEDDING_MODEL`
 - All getters have sensible defaults; no required env vars for basic operation
+
+### Component 4: Qdrant Vector Database (`app/vector_store.py`, `app/embeddings.py`, `app/retrieval.py`)
+
+**Purpose**: RAG pipeline — embed text chunks, store vectors in Qdrant, and retrieve semantically similar content for context injection.
+
+**RAG Pipeline**:
+
+```mermaid
+sequenceDiagram
+    participant U as User / API
+    participant R as Retrieval
+    participant E as Embeddings
+    participant V as Vector Store
+    participant Q as Qdrant Server
+    participant O as Ollama
+
+    Note over U,Q: === Document Ingestion ===
+    U->>R: add_document(source, text)
+    R->>R: _chunk_text(text, 500 chars, 50 overlap)
+    loop Each chunk
+        R->>E: embed_text(chunk)
+        E->>O: OllamaEmbeddings.embed_query(chunk)
+        O-->>E: vector (float[])
+        E-->>R: vector
+        R->>V: add_point(source, content, vector)
+        V->>V: _ensure_collection(dimension)
+        V->>Q: upsert(PointStruct)
+        Q-->>V: ok
+    end
+    R-->>U: chunks_added count
+
+    Note over U,Q: === Semantic Search ===
+    U->>R: search_diverse(query)
+    R->>E: embed_text(query)
+    E->>O: OllamaEmbeddings.embed_query(query)
+    O-->>E: query_vector
+    E-->>R: query_vector
+    R->>V: search_with_scores(query_vector, limit=200)
+    V->>Q: query_points(cosine similarity)
+    Q-->>V: scored results
+    V-->>R: hits with scores
+    R->>R: Group by source, top 10 per source
+    R-->>U: balanced chunk list
+```
+
+**Embeddings** (`app/embeddings.py`):
+- Backend: Ollama only (via `langchain_ollama.OllamaEmbeddings`)
+- Default model: `nomic-embed-text`
+- Lazy initialization — singleton `_embeddings_ollama` created on first call
+- `embed_text(str) → List[float]` for single strings
+- `embed_texts(List[str]) → List[List[float]]` for batch embedding
+- Includes `cosine_similarity()` utility (pure Python, no numpy)
+
+**Chunking** (`app/retrieval.py`):
+- Documents split into 500-character chunks with 50-character overlap
+- Prefers paragraph boundaries (double newline split) before falling back to fixed-size windows
+- Max 8000 characters embedded per chunk (truncated if longer)
+
+**Vector Store** (`app/vector_store.py`):
+- Lazy Qdrant client initialization (singleton `_client`)
+- Collection: `rag_chunks` (configurable via `QDRANT_COLLECTION` env)
+- Auto-creates collection on first `add_point()` with cosine distance
+- Point IDs: UUID4 strings
+- Payload per point: `{source, content, created_at}`
+- `search_with_scores()` returns hits with similarity scores for diverse retrieval
+- `list_all()` paginates via `scroll()` (100 points per page)
+- `delete_by_source()` uses Qdrant filter selector for bulk deletion
+
+**Diverse Search** (`app/retrieval.py → search_diverse()`):
+- Fetches up to 200 candidates from Qdrant
+- Groups by `source` field
+- Takes top 10 per source to prevent a single large document from dominating results
+- Final results sorted by score descending
