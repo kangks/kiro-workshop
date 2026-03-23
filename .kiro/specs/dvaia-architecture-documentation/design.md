@@ -115,3 +115,95 @@ Services:
 - Single HTML page with 8 tabbed panels, each targeting a different vulnerability class
 - JavaScript modules: `app.js` (chat panels), `session.js` (auth flow), `documents.js` (upload/list), `rag.js` (RAG operations), `payloads.js` (payload generation)
 - Sampling controls exposed per-panel: temperature, top_k, top_p, max_tokens, repeat_penalty
+
+### Component 2: LangChain Orchestration (`app/chat.py`, `app/agent.py`, `core/models.py`)
+
+**Purpose**: Bridges user requests to LLM inference. Two modes: simple chat (single/multi-turn with optional context injection) and agentic ReAct loop with tool calling.
+
+**Chat Flow** (`app/chat.py → core/models.py → core/llm.py`):
+
+```mermaid
+sequenceDiagram
+    participant S as Flask Server
+    participant C as Chat Handler
+    participant D as Document Manager
+    participant F as URL Fetcher
+    participant R as RAG Retrieval
+    participant M as Model Router
+    participant L as LLM Factory
+    participant O as Ollama
+
+    S->>C: handle_chat(prompt, context_from, ...)
+    alt context_from == "upload"
+        C->>D: get_document(document_id)
+        D-->>C: extracted_text
+    else context_from == "url"
+        C->>F: fetch_url_to_text(url)
+        F-->>C: page_text
+    else context_from == "rag"
+        C->>R: search_diverse(rag_query)
+        R-->>C: chunks[]
+    end
+    C->>C: Prepend context to prompt (no sanitization)
+    C->>M: generate(full_prompt, model_id, options)
+    M->>L: get_llm(model_id, **kwargs)
+    L->>O: ChatOllama.invoke(messages)
+    O-->>L: AIMessage
+    L-->>M: response
+    M-->>C: {text, thinking}
+    C-->>S: {text, thinking}
+```
+
+**Context injection** (vulnerable by design): Document text, URL content, or RAG chunks are prepended directly to the user prompt with labels like `"Context from document:\n{text}\n"`. No escaping or sanitization.
+
+**Multi-turn**: When `messages` list is provided, it bypasses context building and sends the full conversation history directly to `generate()`.
+
+**Agent Flow** (`app/agent.py`):
+
+```mermaid
+sequenceDiagram
+    participant S as Flask Server
+    participant A as Agent Runner
+    participant L as LLM (with tools bound)
+    participant O as Ollama
+    participant T as Tool Functions
+    participant DB as SQLite
+
+    S->>A: run_agent(prompt, messages, tool_names, ...)
+    A->>A: Build LangChain message history
+    A->>L: llm.bind_tools(selected_tools)
+    loop ReAct Loop (max_steps)
+        A->>L: invoke(messages)
+        L->>O: ChatOllama (reasoning=True)
+        O-->>L: AIMessage + tool_calls + reasoning
+        alt Has tool_calls
+            loop Each tool call
+                A->>T: tool.invoke(args)
+                T->>DB: SQL query
+                DB-->>T: results
+                T-->>A: JSON string
+            end
+            A->>A: Append AIMessage + ToolMessages
+            A->>A: Record thinking step
+        else No tool_calls (final answer)
+            A-->>S: {text, thinking, messages, tool_calls}
+        end
+    end
+```
+
+**6 Agent Tools** (all SQLite-backed, no auth checks):
+
+| Tool | Access | Description |
+|---|---|---|
+| `list_users` | Read | All users (id, username, role, created_at) |
+| `list_documents` | Read | All documents (id, filename, user_id, created_at) |
+| `list_secret_agents` | Read | All secret agents (id, name, handler, mission) |
+| `get_document_by_id` | Read | Single document with extracted_text (truncated to 5000 chars) |
+| `delete_document_by_id` | Write | Delete document — no auth check (vulnerable by design) |
+| `get_internal_config` | Read | Fake internal API key and config (red-team bait) |
+
+**Responsibilities**:
+- Convert `[{role, content}]` dicts to LangChain `HumanMessage`/`AIMessage`/`SystemMessage` objects
+- Support tool subset selection via `tool_names` parameter
+- Extract chain-of-thought from Ollama's `reasoning_content` / `message.thinking` fields
+- Format ReAct steps into human-readable thinking trace for the UI side panel
