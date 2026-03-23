@@ -320,3 +320,114 @@ sequenceDiagram
 - Groups by `source` field
 - Takes top 10 per source to prevent a single large document from dominating results
 - Final results sorted by score descending
+
+### Component 5: Authentication & Session (`app/auth.py`, `app/mfa.py`)
+
+**Purpose**: Simple session-based authentication with MFA. Deliberately weak for red-team testing.
+
+**Responsibilities**:
+- Password hashing: SHA256 only, no salt (vulnerable by design)
+- Login: Lookup user by username, compare hash, return user dict or None
+- Session: Flask session stores `user_id` and `mfa_verified` flag
+- MFA: Verify code against `mfa_codes` table, then `backup_codes` table as fallback
+- Test user seeded on DB init: username=`test`, password=`test`, MFA code=`123456`, backup codes=`backup1`/`backup2`/`backup3`
+
+### Component 6: Document Management (`app/documents.py`)
+
+**Purpose**: Upload, store, extract text from, and manage documents. Extracted text feeds into chat context and RAG pipeline.
+
+**Responsibilities**:
+- Save uploaded files to `UPLOAD_DIR` with UUID-prefixed filenames
+- Extract text from: PDF (PyPDF2), DOCX (python-docx), images (Pillow + pytesseract OCR), plain text, CSV
+- Lazy extraction: if `extracted_text` is null on retrieval, extract and update DB
+- CRUD operations delegated to `app/db.py`
+
+### Component 7: URL Fetcher (`app/fetch.py`)
+
+**Purpose**: Fetch external URLs and return plain text. Used for web-injection tests.
+
+**Responsibilities**:
+- HTTP/HTTPS only (no other schemes)
+- Uses `curl_cffi` with Chrome impersonation for browser-like TLS fingerprint
+- Strips `<script>` and `<style>` tags, then all HTML tags, collapses whitespace
+- No SSRF allowlist — any URL is fetched (vulnerable by design)
+
+### Component 8: Payload Generator (`payloads/`)
+
+**Purpose**: Generate test assets for document and multimodal injection attacks.
+
+**Asset Types**:
+
+| Type | Module | Output |
+|---|---|---|
+| Text | `payloads/documents.py` | `.txt` files |
+| CSV | `payloads/csv.py` | Custom or Faker-generated dummy data |
+| PDF | `payloads/documents.py` | Text overlay, hidden content, metadata injection |
+| Image | `payloads/images.py` | Text overlay with per-line font, color, alpha, rotation, blur, noise |
+| QR Code | `payloads/qr.py` | QR images, optionally composited onto larger canvas |
+| Audio (synthetic) | `payloads/audio.py` | WAV sine tone |
+| Audio (TTS) | `payloads/audio.py` | gTTS text-to-speech WAV |
+
+**Output directory**: `PAYLOADS_OUTPUT_DIR` env, defaults to `payloads/generate/` (local) or `/tmp/payloads/generate` (Docker).
+
+## Data Models
+
+### SQLite Schema (`app/db.py`)
+
+```mermaid
+erDiagram
+    users {
+        INTEGER id PK
+        TEXT username UK
+        TEXT password_hash
+        TEXT role
+        TEXT created_at
+    }
+    mfa_codes {
+        INTEGER user_id PK,FK
+        TEXT code
+        TEXT created_at
+    }
+    backup_codes {
+        INTEGER user_id FK
+        TEXT code
+        TEXT created_at
+    }
+    documents {
+        INTEGER id PK
+        INTEGER user_id FK
+        TEXT filename
+        TEXT file_path
+        TEXT extracted_text
+        TEXT created_at
+    }
+    secret_agents {
+        INTEGER id PK
+        TEXT name
+        TEXT handler
+        TEXT mission
+        TEXT created_at
+    }
+
+    users ||--o| mfa_codes : "has one"
+    users ||--o{ backup_codes : "has many"
+    users ||--o{ documents : "owns"
+```
+
+- Raw SQL queries throughout — no ORM
+- `init_db()` creates tables and seeds test data (user + MFA codes + secret agents) on first startup
+- All timestamps default to `datetime('now')` (SQLite)
+
+### Qdrant Point Schema
+
+Each RAG chunk is stored as a Qdrant point:
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | UUID string | Point identifier |
+| `vector` | `float[]` | Embedding from nomic-embed-text |
+| `payload.source` | string | Origin label (filename or "manual") |
+| `payload.content` | string | Chunk text content |
+| `payload.created_at` | ISO 8601 string | Insertion timestamp |
+
+Collection config: cosine distance, dimension auto-detected from first embedding.
