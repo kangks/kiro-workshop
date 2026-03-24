@@ -291,8 +291,8 @@ Build a comprehensive security characterization test suite for the DVAIA applica
 - [x] 14. Checkpoint - Verify MFA, documents, and retrieval tests
   - Ensure all GREEN tests pass and RED tests fail as expected, ask the user if questions arise.
 
-- [-] 15. Embeddings layer characterization tests (`tests/test_embeddings.py`)
-  - [-] 15.1 Implement embeddings characterization tests
+- [x] 15. Embeddings layer characterization tests (`tests/test_embeddings.py`)
+  - [x] 15.1 Implement embeddings characterization tests
     - Test `embed_text` with non-empty string returns list of floats from mocked model
     - Test `embed_text` with empty or whitespace-only string returns empty list
     - Test `embed_texts` with list of non-empty strings returns list of float vectors
@@ -311,8 +311,8 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any string of only whitespace characters, `embed_text` returns empty list
     - **Validates: Requirement 13.2**
 
-- [ ] 16. Vector store layer characterization tests (`tests/test_vector_store.py`)
-  - [~] 16.1 Implement vector store characterization tests
+- [-] 16. Vector store layer characterization tests (`tests/test_vector_store.py`)
+  - [-] 16.1 Implement vector store characterization tests
     - Test `add_point` with source, content, and non-empty vector calls Qdrant upsert and returns UUID string
     - Test `add_point` with empty vector raises ValueError
     - Test `search` with query vector calls Qdrant query_points and returns payload dicts without score
