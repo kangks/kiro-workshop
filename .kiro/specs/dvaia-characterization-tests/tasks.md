@@ -201,13 +201,13 @@ Build a comprehensive security characterization test suite for the DVAIA applica
 - [x] 10. Checkpoint - Verify template, chat, and agent layer tests
   - Ensure all GREEN tests pass and RED tests fail as expected, ask the user if questions arise.
 
-- [-] 11. Secret key and MFA tests
+- [x] 11. Secret key and MFA tests
   - [x] 11.1 Implement secret key RED tests in `tests/test_server.py` (`TestSecretKey`)
     - RED: Test `get_secret_key` without SECRET_KEY env var does NOT return "dev-secret-change-in-production" — will FAIL
     - RED: Test `get_secret_key` returns a cryptographically generated secret of at least 32 characters — will FAIL
     - _Requirements: 9.1, 9.2_
 
-  - [-] 11.2 Implement MFA RED tests in `tests/test_mfa.py` (`TestMfaVerification`)
+  - [x] 11.2 Implement MFA RED tests in `tests/test_mfa.py` (`TestMfaVerification`)
     - Test `verify_code` with invalid code returns False
     - RED: Test `verify_code` with static code "123456" is rejected — will FAIL
     - RED: Test backup code is consumed (deleted) after single use — will FAIL
@@ -220,8 +220,8 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any valid backup code, after one successful verification, the same code fails on second use
     - **Validates: Requirement 10.3**
 
-- [ ] 12. Document upload validation tests (`tests/test_documents.py`)
-  - [~] 12.1 Implement `TestExtractText` — text extraction characterization
+- [-] 12. Document upload validation tests (`tests/test_documents.py`)
+  - [-] 12.1 Implement `TestExtractText` — text extraction characterization
     - Test `extract_text` with .txt file reads and returns content
     - Test `extract_text` with .csv file reads and returns content
     - Test `extract_text` with unknown extension returns empty string
