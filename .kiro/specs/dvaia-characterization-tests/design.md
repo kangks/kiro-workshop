@@ -323,3 +323,61 @@ class TestPayloadRoutes:
     def test_generate_unknown_asset_type(self, flask_client): ...
     def test_list_payloads(self, flask_client): ...
 ```
+
+
+## Data Models
+
+### Model 1: Test Database Seed Data
+
+```python
+# Expected state after init_db() — tests validate this exact shape
+
+SEED_USER = {
+    "id": 1,  # AUTOINCREMENT first row
+    "username": "test",
+    "password_hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "role": "user",
+    "created_at": str,  # datetime('now') format
+}
+
+SEED_MFA = {"user_id": 1, "code": "123456"}
+
+SEED_BACKUP_CODES = ["backup1", "backup2", "backup3"]
+
+SEED_SECRET_AGENTS = [
+    {"name": "Alex Reed", "handler": "Shadow", "mission": "Infiltrate and assess supply chain security."},
+    {"name": "Jordan Blake", "handler": "Echo", "mission": "Gather intelligence on offshore operations."},
+    {"name": "Sam Chen", "handler": "Ghost", "mission": "Neutralize insider threats before they escalate."},
+]
+```
+
+**Validation Rules**:
+- User password_hash is SHA256 of "test" (no salt)
+- MFA code is static string "123456"
+- Backup codes are static strings "backup1", "backup2", "backup3"
+- Secret agents table has exactly 3 rows after seed
+
+### Model 2: Flask API Response Contracts
+
+```python
+LoginSuccessResponse = {"ok": True, "user_id": int, "username": str, "role": str}
+ChatResponse = {"response": str, "thinking": str}
+AgentResponse = {"response": str, "thinking": str, "messages": list, "tool_calls": list}
+DocumentUploadResponse = {"document_id": int}
+ErrorResponse = {"error": str}
+```
+
+**Validation Rules**:
+- All successful responses return HTTP 200
+- Login failure returns HTTP 401
+- Missing required fields return HTTP 400
+- Not found returns HTTP 404
+- Server errors return HTTP 500
+
+### Model 3: Mock Service Contracts
+
+```python
+MOCK_LLM_RESPONSE = {"text": "mock response", "thinking": ""}
+MOCK_EMBEDDING = [0.1] * 768  # nomic-embed-text dimension
+MOCK_QDRANT_HIT = {"id": "test-uuid", "content": "mock chunk", "source": "test-source", "score": 0.95}
+```
