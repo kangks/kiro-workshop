@@ -28,7 +28,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
 - [x] 2. Checkpoint - Verify test infrastructure
   - Ensure conftest.py fixtures load without errors, ask the user if questions arise.
 
-- [-] 3. Database layer characterization tests (`tests/test_db.py`)
+- [x] 3. Database layer characterization tests (`tests/test_db.py`)
   - [x] 3.1 Implement `TestInitDb` — schema creation and seed data validation
     - Test all 5 tables exist after `init_db()`
     - Test seeded user test with username "test" and role "user"
@@ -77,7 +77,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any valid user_id, filename, file_path, extracted_text, `insert_document` then `get_document` returns matching data
     - **Validates: Requirement 2.13**
 
-  - [-] 3.8 Implement `TestSecretAgentCrud` — secret agent CRUD operations
+  - [x] 3.8 Implement `TestSecretAgentCrud` — secret agent CRUD operations
     - Test `list_secret_agents` returns all agents ordered by created_at ascending
     - Test `get_secret_agent` with valid id returns matching agent dict
     - Test `insert_secret_agent` inserts new agent row and returns new id
@@ -90,11 +90,11 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any valid name, handler, mission, `insert_secret_agent` then `get_secret_agent` returns matching data
     - **Validates: Requirements 2.21, 2.22**
 
-- [ ] 4. Checkpoint - Verify database layer tests
+- [x] 4. Checkpoint - Verify database layer tests
   - Ensure all DB characterization tests pass (GREEN tests) and RED tests fail as expected, ask the user if questions arise.
 
-- [ ] 5. Auth layer tests (`tests/test_auth.py`)
-  - [~] 5.1 Implement `TestPasswordHashing` — characterize current SHA256 behavior and RED secure assertions
+- [-] 5. Auth layer tests (`tests/test_auth.py`)
+  - [-] 5.1 Implement `TestPasswordHashing` — characterize current SHA256 behavior and RED secure assertions
     - Test `check_password` with correct password returns True
     - Test `check_password` with wrong password returns False
     - RED: Test `hash_password` returns bcrypt or argon2 hash (not 64-char SHA256 hex) — will FAIL
