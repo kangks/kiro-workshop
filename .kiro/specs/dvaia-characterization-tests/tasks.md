@@ -148,7 +148,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
   - Ensure all GREEN tests pass and RED tests fail as expected, ask the user if questions arise.
 
 - [-] 8. Template injection and chat orchestration tests
-  - [-] 8.1 Implement template injection RED tests in `tests/test_server.py` (`TestChatWithTemplate`)
+  - [x] 8.1 Implement template injection RED tests in `tests/test_server.py` (`TestChatWithTemplate`)
     - RED: Test `_build_prompt_from_template` neutralizes template-breaking characters (`}}`, `{{`) — will FAIL
     - RED: Test `_build_prompt_from_template` escapes special characters before substitution — will FAIL
     - RED: Test `/api/chat-with-template` sanitizes user_input before constructing prompt — will FAIL
@@ -160,7 +160,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any template with `{{user_input}}` and any user_input with template-breaking chars, constructed prompt does not contain raw injection payload
     - **Validates: Requirements 5.1, 5.2**
 
-  - [~] 8.3 Implement context injection RED tests in `tests/test_chat.py` (`TestHandleChat`)
+  - [-] 8.3 Implement context injection RED tests in `tests/test_chat.py` (`TestHandleChat`)
     - Test direct prompt (no context_from) passes prompt to `generate` without modification
     - Test messages list passes directly to `generate`, prompt ignored
     - RED: Test document context (context_from="upload") sanitizes document text before prepending — will FAIL
