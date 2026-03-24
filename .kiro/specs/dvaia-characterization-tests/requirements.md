@@ -127,3 +127,158 @@ This document specifies requirements for a characterization test suite covering 
 3. WHEN `handle_chat` is called with `context_from="rag"` and a rag_query, THE Test_Suite SHALL verify the retrieved chunks are prepended to the prompt with prefix "Context from retrieval:\n" and no sanitization
 4. WHEN `handle_chat` is called with only a prompt (no context_from), THE Test_Suite SHALL verify the prompt is passed directly to `generate` without modification
 5. WHEN `handle_chat` is called with a `messages` list, THE Test_Suite SHALL verify the messages are passed directly to `generate` and the prompt parameter is ignored
+
+### Requirement 7: Vulnerability — Agent Tools No Auth Checks (OWASP A01:2021)
+
+**User Story:** As a security tester, I want red tests documenting that `app/agent.py` tools (list_users, list_documents, list_secret_agents, get_document_by_id, delete_document_by_id, get_internal_config) execute without any authentication or authorization checks, so that future access controls can be validated.
+
+#### Acceptance Criteria
+
+1. WHEN the `list_users` tool is invoked, THE Test_Suite SHALL verify it returns all users without requiring any authentication context
+2. WHEN the `list_documents` tool is invoked, THE Test_Suite SHALL verify it returns all documents (user_id=None) without requiring any authentication context
+3. WHEN the `list_secret_agents` tool is invoked, THE Test_Suite SHALL verify it returns all secret agents without requiring any authentication context
+4. WHEN the `get_document_by_id` tool is invoked with any document_id, THE Test_Suite SHALL verify it returns the document (user_id=None) without ownership checks
+5. WHEN the `delete_document_by_id` tool is invoked with any document_id, THE Test_Suite SHALL verify it deletes the document (user_id=None) without ownership or authentication checks — documenting the critical vulnerability
+6. WHEN `run_agent` is called with a prompt, THE Test_Suite SHALL verify it returns a dict with keys text, thinking, messages, and tool_calls
+
+### Requirement 8: Vulnerability — Data Exposure via get_internal_config (OWASP A01:2021)
+
+**User Story:** As a security tester, I want a red test documenting that `app/agent.py` `get_internal_config` tool exposes internal configuration data (API keys, environment info) without access control, so that future data protection can be validated.
+
+#### Acceptance Criteria
+
+1. WHEN the `get_internal_config` tool is invoked, THE Test_Suite SHALL verify it returns a JSON string containing keys "internal_api_key", "env", and "warning"
+2. WHEN the `get_internal_config` tool is invoked, THE Test_Suite SHALL verify the returned "internal_api_key" value is "dvaia-test-key-do-not-use" — documenting that sensitive data is exposed without authentication
+
+### Requirement 9: Vulnerability — Hardcoded Secret Key (OWASP A02:2021)
+
+**User Story:** As a security tester, I want a red test documenting that `app/config.py` `get_secret_key` returns a hardcoded default value, so that future secret management can be validated.
+
+#### Acceptance Criteria
+
+1. WHEN `get_secret_key` is called without the SECRET_KEY environment variable set, THE Test_Suite SHALL verify it returns the hardcoded string "dev-secret-change-in-production"
+2. WHEN the Flask app is initialized, THE Test_Suite SHALL verify `app.config["SECRET_KEY"]` is set from `get_secret_key()` — documenting that the hardcoded default is used in the application
+
+### Requirement 10: Vulnerability — Static MFA Codes (OWASP A07:2021)
+
+**User Story:** As a security tester, I want red tests documenting that `app/db.py` seeds static MFA and backup codes, and `app/mfa.py` accepts them without expiration or rate limiting, so that future MFA hardening can be validated.
+
+#### Acceptance Criteria
+
+1. WHEN `verify_code` is called with user_id=1 and code="123456", THE Test_Suite SHALL verify it returns True — documenting the static MFA code
+2. WHEN `verify_code` is called with user_id=1 and an invalid code, THE Test_Suite SHALL verify it returns False
+3. WHEN `verify_code` is called with user_id=1 and code="backup1", THE Test_Suite SHALL verify it returns True — documenting that static backup codes are accepted
+4. WHEN `verify_code` is called with user_id=1 and an invalid backup code, THE Test_Suite SHALL verify it returns False
+5. WHEN `get_backup_codes` is called with user_id=1, THE Test_Suite SHALL verify it returns exactly ["backup1", "backup2", "backup3"] — documenting the static backup codes
+
+### Requirement 11: Vulnerability — No Upload Validation (OWASP A03:2021)
+
+**User Story:** As a security tester, I want red tests documenting that `app/documents.py` accepts file uploads without validating file type, size, or content, so that future upload hardening can be validated.
+
+#### Acceptance Criteria
+
+1. WHEN `extract_text` is called with a .txt file, THE Test_Suite SHALL verify it reads and returns the file content
+2. WHEN `extract_text` is called with a .csv file, THE Test_Suite SHALL verify it reads and returns the file content
+3. WHEN `extract_text` is called with an unknown file extension, THE Test_Suite SHALL verify it returns an empty string
+4. WHEN `extract_text` encounters a read error, THE Test_Suite SHALL verify it returns an empty string
+5. WHEN `save_upload` is called with a file-like object, THE Test_Suite SHALL verify it saves the file to the upload directory, inserts a document row, and extracts text — without validating file type, size, or content
+6. WHEN `get_document` is called and the document has no extracted_text, THE Test_Suite SHALL verify it lazily extracts text from the file_path and updates the database
+7. WHEN `delete_document` is called, THE Test_Suite SHALL verify it removes both the file from disk and the database row
+8. WHEN `list_documents` is called, THE Test_Suite SHALL verify it returns documents for the given user_id
+
+### Requirement 12: Vulnerability — RAG Poisoning / No Chunk Validation (OWASP LLM03)
+
+**User Story:** As a security tester, I want red tests documenting that `app/retrieval.py` accepts and stores RAG chunks without content validation or sanitization, so that future chunk validation can be validated.
+
+#### Acceptance Criteria
+
+1. WHEN `add_chunk` is called with any source and content string, THE Test_Suite SHALL verify it embeds and stores the chunk without validating or sanitizing the content — documenting the RAG poisoning surface
+2. WHEN `add_document` is called with a text string, THE Test_Suite SHALL verify it splits the text into chunks using `_chunk_text` and stores each chunk
+3. WHEN `_chunk_text` is called with text and a chunk_size, THE Test_Suite SHALL verify all returned chunks have length less than or equal to chunk_size
+4. WHEN `search` is called with a query, THE Test_Suite SHALL verify it embeds the query and returns content strings from Qdrant similarity search
+5. WHEN `search_diverse` is called with a query, THE Test_Suite SHALL verify it balances results across sources by taking top_k_per_source from each source
+6. WHEN `list_chunks` is called, THE Test_Suite SHALL verify it returns all stored chunks from Qdrant
+7. WHEN `delete_chunks_by_source` is called, THE Test_Suite SHALL verify it removes all chunks matching the given source
+
+### Requirement 13: Embeddings Layer Characterization
+
+**User Story:** As a developer, I want characterization tests for `app/embeddings.py`, so that I can verify the Ollama embedding wrapper behavior before refactoring.
+
+#### Acceptance Criteria
+
+1. WHEN `embed_text` is called with a non-empty string, THE Test_Suite SHALL verify it returns a list of floats from the mocked embedding model
+2. WHEN `embed_text` is called with an empty or whitespace-only string, THE Test_Suite SHALL verify it returns an empty list
+3. WHEN `embed_texts` is called with a list of non-empty strings, THE Test_Suite SHALL verify it returns a list of float vectors from the mocked embedding model
+4. WHEN `embed_texts` is called with an empty list, THE Test_Suite SHALL verify it returns an empty list
+5. WHEN `cosine_similarity` is called with two equal-length non-zero vectors, THE Test_Suite SHALL verify it returns a float between -1.0 and 1.0
+6. WHEN `cosine_similarity` is called with mismatched or empty vectors, THE Test_Suite SHALL verify it returns 0.0
+
+### Requirement 14: Vector Store Layer Characterization
+
+**User Story:** As a developer, I want characterization tests for `app/vector_store.py`, so that I can verify the Qdrant wrapper behavior before refactoring.
+
+#### Acceptance Criteria
+
+1. WHEN `add_point` is called with source, content, and a non-empty vector, THE Test_Suite SHALL verify it calls Qdrant upsert and returns a UUID string
+2. WHEN `add_point` is called with an empty vector, THE Test_Suite SHALL verify it raises a ValueError
+3. WHEN `search` is called with a query vector, THE Test_Suite SHALL verify it calls Qdrant query_points and returns payload dicts without score
+4. WHEN `search_with_scores` is called with a query vector, THE Test_Suite SHALL verify it returns payload dicts including a score field
+5. WHEN `list_all` is called, THE Test_Suite SHALL verify it scrolls through all Qdrant points and returns dicts with id, source, content, created_at
+6. WHEN `delete_by_source` is called with a source string, THE Test_Suite SHALL verify it calls Qdrant delete with a source filter
+
+### Requirement 15: Core LLM Factory Characterization
+
+**User Story:** As a developer, I want characterization tests for `core/llm.py`, so that I can verify the LangChain ChatOllama factory behavior before refactoring.
+
+#### Acceptance Criteria
+
+1. WHEN `get_llm` is called with a model_id prefixed with "ollama:", THE Test_Suite SHALL verify it strips the prefix and creates a ChatOllama instance with the correct model name
+2. WHEN `get_llm` is called with a model_id without the "ollama:" prefix, THE Test_Suite SHALL verify it creates a ChatOllama instance using the model_id directly
+3. WHEN `get_llm` is called with None or empty model_id, THE Test_Suite SHALL verify it falls back to the DEFAULT_MODEL from environment or config
+
+### Requirement 16: Core Models Generate Characterization
+
+**User Story:** As a developer, I want characterization tests for `core/models.py`, so that I can verify the `generate()` function behavior before refactoring.
+
+#### Acceptance Criteria
+
+1. WHEN `generate` is called with a prompt string, THE Test_Suite SHALL verify it invokes the LLM with a HumanMessage and returns `{"text": str, "thinking": ""}`
+2. WHEN `generate` is called with a messages list, THE Test_Suite SHALL verify it converts messages to LangChain format and invokes the LLM
+3. WHEN `generate` is called with options (num_predict, temperature), THE Test_Suite SHALL verify the options are passed through to the LLM constructor
+
+### Requirement 17: API Route Contracts Characterization
+
+**User Story:** As a developer, I want characterization tests for all Flask routes in `api/server.py`, so that I can verify HTTP status codes, JSON response shapes, and session behavior before refactoring.
+
+#### Acceptance Criteria
+
+1. WHEN GET `/api/health` is called, THE Test_Suite SHALL verify it returns HTTP 200 with `{"status": "ok"}`
+2. WHEN GET `/api/models` is called, THE Test_Suite SHALL verify it returns HTTP 200 with keys "default", "agentic_model", "format", "examples"
+3. WHEN POST `/api/login` is called with valid credentials, THE Test_Suite SHALL verify it returns HTTP 200 with `{"ok": true, "user_id": int, "username": str, "role": str}` and sets session user_id
+4. WHEN POST `/api/login` is called with missing fields, THE Test_Suite SHALL verify it returns HTTP 400
+5. WHEN POST `/api/login` is called with invalid credentials, THE Test_Suite SHALL verify it returns HTTP 401
+6. WHEN POST `/api/logout` is called, THE Test_Suite SHALL verify it clears the session and returns HTTP 200
+7. WHEN GET `/api/session` is called while logged in, THE Test_Suite SHALL verify it returns the user object with id, username, role, mfa_verified
+8. WHEN GET `/api/session` is called while not logged in, THE Test_Suite SHALL verify it returns `{"user": null}` with HTTP 200
+9. WHEN POST `/api/mfa` is called with a valid code while logged in, THE Test_Suite SHALL verify it sets `session.mfa_verified=True` and returns HTTP 200
+10. WHEN POST `/api/mfa` is called with an invalid code, THE Test_Suite SHALL verify it returns HTTP 401
+11. WHEN POST `/api/mfa` is called while not logged in, THE Test_Suite SHALL verify it returns HTTP 401
+12. WHEN POST `/api/chat` is called with a prompt, THE Test_Suite SHALL verify it returns HTTP 200 with `{"response": str, "thinking": str}`
+13. WHEN POST `/api/chat` is called without a prompt or messages, THE Test_Suite SHALL verify it returns HTTP 400
+14. WHEN POST `/api/chat` is called with context_from="upload" and a document_id, THE Test_Suite SHALL verify the document context is injected into the prompt
+15. WHEN POST `/api/chat` is called with context_from="url" and a URL, THE Test_Suite SHALL verify the URL content is injected into the prompt
+16. WHEN POST `/api/chat` is called with context_from="rag" and a rag_query, THE Test_Suite SHALL verify the RAG chunks are injected into the prompt
+17. WHEN POST `/api/agent/chat` is called with a prompt, THE Test_Suite SHALL verify it returns HTTP 200 with `{"response": str, "thinking": str, "messages": list, "tool_calls": list}`
+18. WHEN POST `/api/agent/chat` is called without a prompt, THE Test_Suite SHALL verify it returns HTTP 400
+19. WHEN POST `/api/documents/upload` is called with a file, THE Test_Suite SHALL verify it returns HTTP 200 with `{"document_id": int}`
+20. WHEN POST `/api/documents/upload` is called without a file, THE Test_Suite SHALL verify it returns HTTP 400
+21. WHEN GET `/api/documents` is called, THE Test_Suite SHALL verify it returns HTTP 200 with a documents list
+22. WHEN GET `/api/documents/<id>` is called with a valid id, THE Test_Suite SHALL verify it returns the document with id, filename, extracted_text, created_at
+23. WHEN DELETE `/api/documents/<id>` is called while not logged in, THE Test_Suite SHALL verify it returns HTTP 401
+24. WHEN GET `/api/rag/search` is called with an empty query, THE Test_Suite SHALL verify it returns `{"chunks": []}`
+25. WHEN POST `/api/rag/chunks` is called with content, THE Test_Suite SHALL verify it returns HTTP 200 with `{"id": str}`
+26. WHEN GET `/api/rag/chunks` is called, THE Test_Suite SHALL verify it returns HTTP 200 with a chunks list
+27. WHEN POST `/api/rag/delete-by-source` is called while not logged in, THE Test_Suite SHALL verify it returns HTTP 401
+28. WHEN POST `/api/payloads/generate` is called with asset_type="text", THE Test_Suite SHALL verify it returns HTTP 200 with path and relative_path
+29. WHEN POST `/api/payloads/generate` is called with an unknown asset_type, THE Test_Suite SHALL verify it returns HTTP 400
+30. WHEN GET `/api/payloads/list` is called, THE Test_Suite SHALL verify it returns HTTP 200 with a files list
