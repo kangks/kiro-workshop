@@ -93,8 +93,8 @@ Build a comprehensive security characterization test suite for the DVAIA applica
 - [x] 4. Checkpoint - Verify database layer tests
   - Ensure all DB characterization tests pass (GREEN tests) and RED tests fail as expected, ask the user if questions arise.
 
-- [-] 5. Auth layer tests (`tests/test_auth.py`)
-  - [-] 5.1 Implement `TestPasswordHashing` — characterize current SHA256 behavior and RED secure assertions
+- [x] 5. Auth layer tests (`tests/test_auth.py`)
+  - [x] 5.1 Implement `TestPasswordHashing` — characterize current SHA256 behavior and RED secure assertions
     - Test `check_password` with correct password returns True
     - Test `check_password` with wrong password returns False
     - RED: Test `hash_password` returns bcrypt or argon2 hash (not 64-char SHA256 hex) — will FAIL
@@ -112,14 +112,14 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any two strings p1 and p2, `check_password(hash_password(p1), p2)` returns True iff p1 == p2
     - **Validates: Requirements 3.4, 3.5**
 
-  - [~] 5.4 Implement `TestLogin` — login flow characterization
+  - [x] 5.4 Implement `TestLogin` — login flow characterization
     - Test `login` with valid credentials (test/test) returns user dict with id, username, password_hash, role, created_at
     - Test `login` with wrong password returns None
     - Test `login` with non-existent username returns None
     - _Requirements: 3.6, 3.7, 3.8_
 
-- [ ] 6. Fetch layer tests (`tests/test_fetch.py`)
-  - [~] 6.1 Implement `TestFetchUrlToText` — characterize current behavior and RED SSRF assertions
+- [x] 6. Fetch layer tests (`tests/test_fetch.py`)
+  - [x] 6.1 Implement `TestFetchUrlToText` — characterize current behavior and RED SSRF assertions
     - Test non-http schemes (ftp://, file://) return empty string
     - Test HTML stripping removes script, style, and HTML tags
     - Test network error returns empty string
@@ -144,11 +144,11 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any HTML string, `_strip_html` returns a string containing no `<` or `>` characters
     - **Validates: Requirement 4.6**
 
-- [ ] 7. Checkpoint - Verify auth and fetch layer tests
+- [x] 7. Checkpoint - Verify auth and fetch layer tests
   - Ensure all GREEN tests pass and RED tests fail as expected, ask the user if questions arise.
 
-- [ ] 8. Template injection and chat orchestration tests
-  - [~] 8.1 Implement template injection RED tests in `tests/test_server.py` (`TestChatWithTemplate`)
+- [-] 8. Template injection and chat orchestration tests
+  - [-] 8.1 Implement template injection RED tests in `tests/test_server.py` (`TestChatWithTemplate`)
     - RED: Test `_build_prompt_from_template` neutralizes template-breaking characters (`}}`, `{{`) — will FAIL
     - RED: Test `_build_prompt_from_template` escapes special characters before substitution — will FAIL
     - RED: Test `/api/chat-with-template` sanitizes user_input before constructing prompt — will FAIL
