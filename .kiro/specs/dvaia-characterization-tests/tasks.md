@@ -43,13 +43,13 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any number of consecutive `init_db()` calls, DB contains exactly 1 user, 1 MFA code, 3 backup codes, 3 secret agents
     - **Validates: Requirement 2.7**
 
-  - [-] 3.3 Implement `TestInitDb` RED tests — seed data security assertions
+  - [x] 3.3 Implement `TestInitDb` RED tests — seed data security assertions
     - Test seeded password_hash is bcrypt or argon2, NOT SHA256 hex digest — RED: currently SHA256, will FAIL
     - Test seeded MFA code is cryptographically random, NOT static "123456" — RED: currently static, will FAIL
     - Test seeded backup codes are cryptographically random, NOT static "backup1/backup2/backup3" — RED: currently static, will FAIL
     - _Requirements: 2.3, 2.4, 2.5_
 
-  - [~] 3.4 Implement `TestUserCrud` — user CRUD operations
+  - [-] 3.4 Implement `TestUserCrud` — user CRUD operations
     - Test `get_user_by_username` with existing username returns dict with keys id, username, password_hash, role, created_at
     - Test `get_user_by_username` with non-existent username returns None
     - Test `get_user_by_id` with valid id returns matching user dict
