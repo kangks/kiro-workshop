@@ -255,3 +255,81 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - **Property 17: Unknown file extensions return empty text**
     - For any file path with extension not in supported set, `extract_text` returns empty string
     - **Validates: Requirement 11.6**
+
+- [ ] 13. RAG retrieval sanitization tests (`tests/test_retrieval.py`)
+  - [ ] 13.1 Implement retrieval characterization and RED sanitization tests
+    - Test `add_document` splits text into chunks and stores each
+    - Test `_chunk_text` returns chunks within size limit
+    - Test `search` embeds query and returns content strings
+    - Test `search_diverse` balances results across sources
+    - Test `list_chunks` returns all stored chunks
+    - Test `delete_chunks_by_source` removes matching chunks
+    - RED: Test `add_chunk` sanitizes content containing prompt injection payloads — will FAIL
+    - RED: Test `add_chunk` validates and sanitizes source parameter with path traversal — will FAIL
+    - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7, 12.8_
+
+  - [ ]* 13.2 Write property test for add_chunk content sanitization (RED)
+    - **Property 18: add_chunk sanitizes content**
+    - For any content with prompt injection payloads, `add_chunk` sanitizes before storing
+    - **Validates: Requirement 12.1**
+
+  - [ ]* 13.3 Write property test for add_chunk source validation (RED)
+    - **Property 19: add_chunk validates source parameter**
+    - For any source with path traversal or injection characters, `add_chunk` sanitizes before storing
+    - **Validates: Requirement 12.2**
+
+  - [ ]* 13.4 Write property test for chunk text size limit
+    - **Property 20: Chunk text respects size limit**
+    - For any non-empty text and chunk_size > 0, every chunk from `_chunk_text` has length ≤ chunk_size
+    - **Validates: Requirement 12.4**
+
+  - [ ]* 13.5 Write property test for diverse search balance
+    - **Property 21: Diverse search balances across sources**
+    - For any set of search results grouped by source, `search_diverse` returns at most top_k_per_source per source
+    - **Validates: Requirement 12.6**
+
+- [ ] 14. Checkpoint - Verify MFA, documents, and retrieval tests
+  - Ensure all GREEN tests pass and RED tests fail as expected, ask the user if questions arise.
+
+- [ ] 15. Embeddings layer characterization tests (`tests/test_embeddings.py`)
+  - [ ] 15.1 Implement embeddings characterization tests
+    - Test `embed_text` with non-empty string returns list of floats from mocked model
+    - Test `embed_text` with empty or whitespace-only string returns empty list
+    - Test `embed_texts` with list of non-empty strings returns list of float vectors
+    - Test `embed_texts` with empty list returns empty list
+    - Test `cosine_similarity` with two equal-length non-zero vectors returns float in [-1.0, 1.0]
+    - Test `cosine_similarity` with mismatched or empty vectors returns 0.0
+    - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5, 13.6_
+
+  - [ ]* 15.2 Write property test for cosine similarity bounds
+    - **Property 22: Cosine similarity is bounded**
+    - For any two equal-length non-zero float vectors, `cosine_similarity` returns value in [-1.0, 1.0]
+    - **Validates: Requirement 13.5**
+
+  - [ ]* 15.3 Write property test for whitespace-only embedding
+    - **Property 23: Whitespace-only text returns empty embedding**
+    - For any string of only whitespace characters, `embed_text` returns empty list
+    - **Validates: Requirement 13.2**
+
+- [ ] 16. Vector store layer characterization tests (`tests/test_vector_store.py`)
+  - [ ] 16.1 Implement vector store characterization tests
+    - Test `add_point` with source, content, and non-empty vector calls Qdrant upsert and returns UUID string
+    - Test `add_point` with empty vector raises ValueError
+    - Test `search` with query vector calls Qdrant query_points and returns payload dicts without score
+    - Test `search_with_scores` returns payload dicts including score field
+    - Test `list_all` scrolls through all Qdrant points and returns dicts with id, source, content, created_at
+    - Test `delete_by_source` calls Qdrant delete with source filter
+    - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6_
+
+- [ ] 17. Core LLM and models characterization tests
+  - [ ] 17.1 Implement core LLM factory tests in `tests/test_llm.py`
+    - Test `get_llm` with "ollama:" prefix strips prefix and creates ChatOllama with correct model name
+    - Test `get_llm` without prefix creates ChatOllama using model_id directly
+    - Test `get_llm` with None or empty model_id falls back to DEFAULT_MODEL
+    - _Requirements: 15.1, 15.2, 15.3_
+
+  - [ ] 17.2 Implement core models generate tests in `tests/test_models.py`
+    - Test `generate` with prompt string invokes LLM with HumanMessage and returns `{"text": str, "thinking": ""}`
+    - Test `generate` with messages list converts to LangChain format and invokes LLM
+    - Test `generate` with options (num_predict, temperature) passes through to LLM constructor
+    - _Requirements: 16.1, 16.2, 16.3_
