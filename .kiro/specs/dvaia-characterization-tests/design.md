@@ -381,3 +381,91 @@ MOCK_LLM_RESPONSE = {"text": "mock response", "thinking": ""}
 MOCK_EMBEDDING = [0.1] * 768  # nomic-embed-text dimension
 MOCK_QDRANT_HIT = {"id": "test-uuid", "content": "mock chunk", "source": "test-source", "score": 0.95}
 ```
+
+
+## Algorithmic Pseudocode
+
+### Algorithm: Test Fixture Initialization
+
+```python
+def setup_test_database(tmp_path: Path, monkeypatch) -> str:
+    """
+    Preconditions:
+    - tmp_path is a valid, writable temporary directory
+    
+    Postconditions:
+    - SQLite file exists at tmp_path / "test.db"
+    - All 5 tables created (users, mfa_codes, backup_codes, documents, secret_agents)
+    - Seed data inserted (1 user, 1 MFA code, 3 backup codes, 3 secret agents)
+    - app.config.get_database_uri patched to return this path
+    """
+    db_path = str(tmp_path / "test.db")
+    monkeypatch.setattr("app.config.get_database_uri", lambda: db_path)
+    app_db.init_db()
+    return db_path
+```
+
+### Algorithm: Flask Test Client with Mocked Services
+
+```python
+def create_flask_test_client(db_path: str) -> FlaskClient:
+    """
+    Preconditions:
+    - db_path points to initialized SQLite with seed data
+    
+    Postconditions:
+    - app.testing == True
+    - core.models.generate returns MOCK_LLM_RESPONSE
+    - app.vector_store._client is MagicMock
+    - app.embeddings._embeddings_ollama is MagicMock
+    """
+    app.config["TESTING"] = True
+    app.config["SECRET_KEY"] = "test-secret"
+    return app.test_client()
+```
+
+## Key Functions with Formal Specifications
+
+### Function 1: app.auth.hash_password(password)
+
+```python
+def hash_password(password: str) -> str: ...
+```
+
+**Preconditions:** `password` is a non-None string
+**Postconditions:**
+- Returns 64-char lowercase hex string = `hashlib.sha256(password.encode("utf-8")).hexdigest()`
+- Deterministic; no salt (VULNERABILITY: intentional)
+
+### Function 2: app.auth.login(username, password)
+
+```python
+def login(username: str, password: str) -> Optional[Dict[str, Any]]: ...
+```
+
+**Preconditions:** strings; DB initialized
+**Postconditions:**
+- Match → user dict {id, username, password_hash, role, created_at}
+- No match → None
+
+### Function 3: app.chat.handle_chat(...)
+
+**Preconditions:** At least `prompt` or `messages` non-empty
+**Postconditions:**
+- Returns {"text", "thinking"}
+- Context prefixed unsanitized (VULNERABILITY: intentional)
+
+### Function 4: app.fetch.fetch_url_to_text(url, timeout)
+
+**Preconditions:** string url; curl_cffi available
+**Postconditions:**
+- http/https → GET + strip HTML; else → ""
+- No SSRF protection (VULNERABILITY: intentional)
+
+### Function 5: _build_prompt_from_template(template, user_input)
+
+**Postconditions:** `template.replace("{{user_input}}", user_input)` — no escaping (VULNERABILITY: intentional)
+
+### Function 6: app.db.delete_document(document_id, user_id)
+
+**Postconditions:** user_id=None bypasses ownership check (VULNERABILITY: agent tool uses this)
