@@ -89,3 +89,57 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - **Property 4: Secret agent CRUD round-trip**
     - For any valid name, handler, mission, `insert_secret_agent` then `get_secret_agent` returns matching data
     - **Validates: Requirements 2.21, 2.22**
+
+- [ ] 4. Checkpoint - Verify database layer tests
+  - Ensure all DB characterization tests pass (GREEN tests) and RED tests fail as expected, ask the user if questions arise.
+
+- [ ] 5. Auth layer tests (`tests/test_auth.py`)
+  - [ ] 5.1 Implement `TestPasswordHashing` — characterize current SHA256 behavior and RED secure assertions
+    - Test `check_password` with correct password returns True
+    - Test `check_password` with wrong password returns False
+    - RED: Test `hash_password` returns bcrypt or argon2 hash (not 64-char SHA256 hex) — will FAIL
+    - RED: Test `hash_password` called twice with same input returns different outputs (salted) — will FAIL
+    - RED: Test `hash_password` output does NOT equal `hashlib.sha256(password.encode()).hexdigest()` — will FAIL
+    - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
+
+  - [ ]* 5.2 Write property test for salted hashing (RED)
+    - **Property 5: hash_password uses salted hashing**
+    - For any string password, output is bcrypt/argon2 (not SHA256), and two calls produce different outputs
+    - **Validates: Requirements 3.1, 3.2, 3.3**
+
+  - [ ]* 5.3 Write property test for password check round-trip
+    - **Property 6: Password check round-trip**
+    - For any two strings p1 and p2, `check_password(hash_password(p1), p2)` returns True iff p1 == p2
+    - **Validates: Requirements 3.4, 3.5**
+
+  - [ ] 5.4 Implement `TestLogin` — login flow characterization
+    - Test `login` with valid credentials (test/test) returns user dict with id, username, password_hash, role, created_at
+    - Test `login` with wrong password returns None
+    - Test `login` with non-existent username returns None
+    - _Requirements: 3.6, 3.7, 3.8_
+
+- [ ] 6. Fetch layer tests (`tests/test_fetch.py`)
+  - [ ] 6.1 Implement `TestFetchUrlToText` — characterize current behavior and RED SSRF assertions
+    - Test non-http schemes (ftp://, file://) return empty string
+    - Test HTML stripping removes script, style, and HTML tags
+    - Test network error returns empty string
+    - RED: Test URL pointing to 169.254.x.x is rejected — will FAIL
+    - RED: Test URL pointing to 10.x.x.x is rejected — will FAIL
+    - RED: Test URL pointing to 127.x.x.x is rejected — will FAIL
+    - RED: Test URL pointing to 192.168.x.x is rejected — will FAIL
+    - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7_
+
+  - [ ]* 6.2 Write property test for SSRF protection (RED)
+    - **Property 7: SSRF protection rejects private/internal IPs**
+    - For any URL whose host falls in private/internal IP ranges, `fetch_url_to_text` returns empty string without network call
+    - **Validates: Requirements 4.1, 4.2, 4.3, 4.4**
+
+  - [ ]* 6.3 Write property test for non-http scheme rejection
+    - **Property 8: Non-http schemes rejected by fetch**
+    - For any URL not starting with http:// or https://, `fetch_url_to_text` returns empty string
+    - **Validates: Requirement 4.5**
+
+  - [ ]* 6.4 Write property test for HTML stripping
+    - **Property 9: HTML stripping removes all tags**
+    - For any HTML string, `_strip_html` returns a string containing no `<` or `>` characters
+    - **Validates: Requirement 4.6**
