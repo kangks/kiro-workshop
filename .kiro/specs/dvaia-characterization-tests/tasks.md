@@ -322,13 +322,13 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6_
 
 - [-] 17. Core LLM and models characterization tests
-  - [-] 17.1 Implement core LLM factory tests in `tests/test_llm.py`
+  - [x] 17.1 Implement core LLM factory tests in `tests/test_llm.py`
     - Test `get_llm` with "ollama:" prefix strips prefix and creates ChatOllama with correct model name
     - Test `get_llm` without prefix creates ChatOllama using model_id directly
     - Test `get_llm` with None or empty model_id falls back to DEFAULT_MODEL
     - _Requirements: 15.1, 15.2, 15.3_
 
-  - [~] 17.2 Implement core models generate tests in `tests/test_models.py`
+  - [-] 17.2 Implement core models generate tests in `tests/test_models.py`
     - Test `generate` with prompt string invokes LLM with HumanMessage and returns `{"text": str, "thinking": ""}`
     - Test `generate` with messages list converts to LangChain format and invokes LLM
     - Test `generate` with options (num_predict, temperature) passes through to LLM constructor
