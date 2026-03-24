@@ -197,3 +197,61 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - RED: Test `get_internal_config` does NOT include API key values in returned data — will FAIL
     - RED: Test `get_internal_config` rejects unauthenticated calls — will FAIL
     - _Requirements: 8.1, 8.2_
+
+- [ ] 10. Checkpoint - Verify template, chat, and agent layer tests
+  - Ensure all GREEN tests pass and RED tests fail as expected, ask the user if questions arise.
+
+- [ ] 11. Secret key and MFA tests
+  - [ ] 11.1 Implement secret key RED tests in `tests/test_server.py` (`TestSecretKey`)
+    - RED: Test `get_secret_key` without SECRET_KEY env var does NOT return "dev-secret-change-in-production" — will FAIL
+    - RED: Test `get_secret_key` returns a cryptographically generated secret of at least 32 characters — will FAIL
+    - _Requirements: 9.1, 9.2_
+
+  - [ ] 11.2 Implement MFA RED tests in `tests/test_mfa.py` (`TestMfaVerification`)
+    - Test `verify_code` with invalid code returns False
+    - RED: Test `verify_code` with static code "123456" is rejected — will FAIL
+    - RED: Test backup code is consumed (deleted) after single use — will FAIL
+    - RED: Test rate limiting after 5+ attempts within 60 seconds — will FAIL
+    - RED: Test `get_backup_codes` returns cryptographically random codes, not static strings — will FAIL
+    - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5_
+
+  - [ ]* 11.3 Write property test for backup codes single-use (RED)
+    - **Property 24: Backup codes are single-use**
+    - For any valid backup code, after one successful verification, the same code fails on second use
+    - **Validates: Requirement 10.3**
+
+- [ ] 12. Document upload validation tests (`tests/test_documents.py`)
+  - [ ] 12.1 Implement `TestExtractText` — text extraction characterization
+    - Test `extract_text` with .txt file reads and returns content
+    - Test `extract_text` with .csv file reads and returns content
+    - Test `extract_text` with unknown extension returns empty string
+    - Test `extract_text` with read error returns empty string
+    - _Requirements: 11.4, 11.5, 11.6, 11.7_
+
+  - [ ] 12.2 Implement `TestSaveUpload` — upload characterization and RED validation assertions
+    - Test `delete_document` removes file from disk and database row
+    - Test `list_documents` returns documents for given user_id
+    - RED: Test `save_upload` rejects disallowed file extensions (.exe, .sh, .php) — will FAIL
+    - RED: Test `save_upload` rejects files exceeding 10MB size limit — will FAIL
+    - RED: Test `save_upload` sanitizes filenames with path traversal (../../etc/passwd) — will FAIL
+    - _Requirements: 11.1, 11.2, 11.3, 11.8, 11.9_
+
+  - [ ]* 12.3 Write property test for disallowed file extensions (RED)
+    - **Property 14: Upload rejects disallowed file extensions**
+    - For any file with extension not in allowed list, `save_upload` rejects the upload
+    - **Validates: Requirement 11.1**
+
+  - [ ]* 12.4 Write property test for oversized files (RED)
+    - **Property 15: Upload rejects oversized files**
+    - For any file exceeding 10MB, `save_upload` rejects the upload
+    - **Validates: Requirement 11.2**
+
+  - [ ]* 12.5 Write property test for filename sanitization (RED)
+    - **Property 16: Upload sanitizes filenames**
+    - For any filename containing path traversal sequences, saved path contains no traversal characters
+    - **Validates: Requirement 11.3**
+
+  - [ ]* 12.6 Write property test for unknown extension text extraction
+    - **Property 17: Unknown file extensions return empty text**
+    - For any file path with extension not in supported set, `extract_text` returns empty string
+    - **Validates: Requirement 11.6**
