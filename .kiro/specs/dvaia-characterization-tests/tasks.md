@@ -256,8 +256,8 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any file path with extension not in supported set, `extract_text` returns empty string
     - **Validates: Requirement 11.6**
 
-- [-] 13. RAG retrieval sanitization tests (`tests/test_retrieval.py`)
-  - [-] 13.1 Implement retrieval characterization and RED sanitization tests
+- [x] 13. RAG retrieval sanitization tests (`tests/test_retrieval.py`)
+  - [x] 13.1 Implement retrieval characterization and RED sanitization tests
     - Test `add_document` splits text into chunks and stores each
     - Test `_chunk_text` returns chunks within size limit
     - Test `search` embeds query and returns content strings
@@ -288,11 +288,11 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any set of search results grouped by source, `search_diverse` returns at most top_k_per_source per source
     - **Validates: Requirement 12.6**
 
-- [ ] 14. Checkpoint - Verify MFA, documents, and retrieval tests
+- [x] 14. Checkpoint - Verify MFA, documents, and retrieval tests
   - Ensure all GREEN tests pass and RED tests fail as expected, ask the user if questions arise.
 
-- [ ] 15. Embeddings layer characterization tests (`tests/test_embeddings.py`)
-  - [~] 15.1 Implement embeddings characterization tests
+- [-] 15. Embeddings layer characterization tests (`tests/test_embeddings.py`)
+  - [-] 15.1 Implement embeddings characterization tests
     - Test `embed_text` with non-empty string returns list of floats from mocked model
     - Test `embed_text` with empty or whitespace-only string returns empty list
     - Test `embed_texts` with list of non-empty strings returns list of float vectors
