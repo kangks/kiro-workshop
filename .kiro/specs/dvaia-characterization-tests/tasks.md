@@ -220,7 +220,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any valid backup code, after one successful verification, the same code fails on second use
     - **Validates: Requirement 10.3**
 
-- [-] 12. Document upload validation tests (`tests/test_documents.py`)
+- [x] 12. Document upload validation tests (`tests/test_documents.py`)
   - [x] 12.1 Implement `TestExtractText` — text extraction characterization
     - Test `extract_text` with .txt file reads and returns content
     - Test `extract_text` with .csv file reads and returns content
@@ -228,7 +228,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - Test `extract_text` with read error returns empty string
     - _Requirements: 11.4, 11.5, 11.6, 11.7_
 
-  - [-] 12.2 Implement `TestSaveUpload` — upload characterization and RED validation assertions
+  - [x] 12.2 Implement `TestSaveUpload` — upload characterization and RED validation assertions
     - Test `delete_document` removes file from disk and database row
     - Test `list_documents` returns documents for given user_id
     - RED: Test `save_upload` rejects disallowed file extensions (.exe, .sh, .php) — will FAIL
@@ -256,8 +256,8 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any file path with extension not in supported set, `extract_text` returns empty string
     - **Validates: Requirement 11.6**
 
-- [ ] 13. RAG retrieval sanitization tests (`tests/test_retrieval.py`)
-  - [~] 13.1 Implement retrieval characterization and RED sanitization tests
+- [-] 13. RAG retrieval sanitization tests (`tests/test_retrieval.py`)
+  - [-] 13.1 Implement retrieval characterization and RED sanitization tests
     - Test `add_document` splits text into chunks and stores each
     - Test `_chunk_text` returns chunks within size limit
     - Test `search` embeds query and returns content strings
