@@ -723,20 +723,23 @@ Tagged `@pytest.mark.integration`, excluded from default run. Requires live Olla
 
 ## Security Considerations
 
-Tests document (not fix) these intentional vulnerabilities:
+Tests assert desired secure behavior (RED tests FAIL today, PASS after hardening):
 
-| Vulnerability | Location | OWASP | Severity | Test File |
-|---|---|---|---|---|
-| SHA256 no salt | app/auth.py | A02:2021 | High | test_auth.py |
-| No SSRF allowlist | app/fetch.py | A10:2021 | High | test_fetch.py |
-| Template injection | api/server.py | LLM01 | High | test_server.py |
-| Context injection | app/chat.py | LLM01 | High | test_chat.py |
-| Agent tools no auth | app/agent.py | A01:2021 | Critical | test_agent.py |
-| Data exposure | app/agent.py | A01:2021 | Medium | test_agent.py |
-| Hardcoded secret | app/config.py | A02:2021 | Medium | test_server.py |
-| Static MFA codes | app/db.py | A07:2021 | Medium | test_mfa.py |
-| No upload validation | app/documents.py | A03:2021 | Medium | test_documents.py |
-| RAG poisoning | app/retrieval.py | LLM03 | High | test_retrieval.py |
+| Vulnerability | Location | OWASP | Severity | Test File | Red Test |
+|---|---|---|---|---|---|
+| SHA256 no salt | app/auth.py | A02:2021 | High | test_auth.py | Asserts bcrypt/argon2 |
+| No SSRF allowlist | app/fetch.py | A10:2021 | High | test_fetch.py | Asserts private IP rejection |
+| Template injection | api/server.py | LLM01 | High | test_server.py | Asserts input sanitization |
+| Context injection | app/chat.py | LLM01 | High | test_chat.py | Asserts context sanitization |
+| Agent tools no auth | app/agent.py | A01:2021 | Critical | test_agent.py | Asserts auth required |
+| Data exposure | app/agent.py | A01:2021 | Medium | test_agent.py | Asserts no API key exposure |
+| Hardcoded secret | app/config.py | A02:2021 | Medium | test_server.py | Asserts crypto secret |
+| Static MFA codes | app/mfa.py | A07:2021 | Medium | test_mfa.py | Asserts random codes, single-use |
+| No upload validation | app/documents.py | A03:2021 | Medium | test_documents.py | Asserts type/size/name validation |
+| RAG poisoning | app/retrieval.py | LLM03 | High | test_retrieval.py | Asserts content sanitization |
+| No CSRF protection | api/server.py | A01:2021 | High | test_server.py | Asserts CSRF tokens |
+| No auth on routes | api/server.py | A01:2021 | High | test_server.py | Asserts auth on sensitive routes |
+| Insecure cookies | api/server.py | A02:2021 | Medium | test_server.py | Asserts secure cookie flags |
 
 ## Performance Considerations
 
