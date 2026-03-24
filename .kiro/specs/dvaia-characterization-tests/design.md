@@ -507,91 +507,157 @@ def test_no_ssrf_protection(self, mock_requests):
 
 ## Correctness Properties
 
-*A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+*A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees. Properties marked RED assert desired secure behavior that FAILS against the current vulnerable code.*
 
 ### Property 1: init_db seed idempotence
 
 *For any* number of consecutive `init_db()` calls (1, 2, or more), the database SHALL contain exactly 1 user, 1 MFA code, 3 backup codes, and 3 secret agents — seed data is never duplicated.
 
-**Validates: Requirement 2.6**
+**Validates: Requirement 2.7**
 
 ### Property 2: User CRUD round-trip
 
 *For any* valid username and password_hash string, calling `create_user(username, password_hash)` and then `get_user_by_id(returned_id)` SHALL return a dict where `username` and `password_hash` match the inputs.
 
-**Validates: Requirement 2.10**
+**Validates: Requirements 2.10, 2.11**
 
 ### Property 3: Document CRUD round-trip
 
 *For any* valid user_id, filename, file_path, and extracted_text, calling `insert_document(...)` and then `get_document(returned_id, user_id)` SHALL return a dict where filename, file_path, and extracted_text match the inputs.
 
-**Validates: Requirement 2.12**
+**Validates: Requirement 2.13**
 
 ### Property 4: Secret agent CRUD round-trip
 
 *For any* valid name, handler, and mission strings, calling `insert_secret_agent(name, handler, mission)` and then `get_secret_agent(returned_id)` SHALL return a dict where name, handler, and mission match the inputs.
 
-**Validates: Requirement 2.21**
+**Validates: Requirements 2.21, 2.22**
 
-### Property 5: hash_password is unsalted SHA256
+### Property 5: hash_password uses salted hashing (RED)
 
-*For any* string `password`, `hash_password(password)` SHALL equal `hashlib.sha256(password.encode("utf-8")).hexdigest()` — a 64-character lowercase hex string with no salt. This characterizes the weak hashing vulnerability.
+*For any* string `password`, `hash_password(password)` SHALL return a bcrypt or argon2 hash (not a 64-char SHA256 hex digest), and calling `hash_password` twice with the same input SHALL produce different outputs due to random salt. RED: currently returns deterministic unsalted SHA256, will FAIL.
 
-**Validates: Requirements 3.1, 3.2**
+**Validates: Requirements 3.1, 3.2, 3.3**
 
 ### Property 6: Password check round-trip
 
 *For any* two strings `p1` and `p2`, `check_password(hash_password(p1), p2)` SHALL return `True` if and only if `p1 == p2`. This validates the auth check is consistent with the hash function.
 
-**Validates: Requirements 3.3, 3.4**
+**Validates: Requirements 3.4, 3.5**
 
-### Property 7: Non-http schemes rejected by fetch
+### Property 7: SSRF protection rejects private/internal IPs (RED)
+
+*For any* URL whose resolved host falls in private/internal IP ranges (169.254.x.x, 10.x.x.x, 127.x.x.x, 192.168.x.x), `fetch_url_to_text(url)` SHALL return an empty string without making a network request. RED: currently fetches all URLs without restriction, will FAIL.
+
+**Validates: Requirements 4.1, 4.2, 4.3, 4.4**
+
+### Property 8: Non-http schemes rejected by fetch
 
 *For any* URL string that does not start with "http://" or "https://", `fetch_url_to_text(url)` SHALL return an empty string without making any network request.
 
-**Validates: Requirement 4.3**
+**Validates: Requirement 4.5**
 
-### Property 8: HTML stripping removes all tags
+### Property 9: HTML stripping removes all tags
 
 *For any* HTML string, `_strip_html(html)` SHALL return a string containing no `<` or `>` characters.
 
-**Validates: Requirement 4.5**
+**Validates: Requirement 4.6**
 
-### Property 9: Template substitution is verbatim (no escaping)
+### Property 10: Template substitution sanitizes user input (RED)
 
-*For any* template string containing `{{user_input}}` and *any* user_input string, `_build_prompt_from_template(template, user_input)` SHALL equal `template.replace("{{user_input}}", user_input)` — the substitution is literal with no escaping or sanitization. This characterizes the template injection vulnerability.
+*For any* template string containing `{{user_input}}` and *any* user_input string containing template-breaking characters (`}}`, `{{`, control characters), `_build_prompt_from_template(template, user_input)` SHALL neutralize those characters so the constructed prompt does not contain the raw injection payload. RED: currently substitutes verbatim with no escaping, will FAIL.
 
 **Validates: Requirements 5.1, 5.2**
 
-### Property 10: Unknown file extensions return empty text
+### Property 11: Context injection sanitization (RED)
 
-*For any* file path whose extension is not in the set {.txt, .csv, .pdf, .doc, .docx, .png, .jpg, .jpeg, .gif, .webp, .bmp, .tiff, .tif} and is not empty, `extract_text(file_path)` SHALL return an empty string.
+*For any* document text, URL content, or RAG chunk containing prompt injection payloads (e.g., "IGNORE ALL PREVIOUS INSTRUCTIONS"), `handle_chat` SHALL sanitize the external content before prepending it to the prompt. RED: currently prepends all context unsanitized, will FAIL.
+
+**Validates: Requirements 6.1, 6.2, 6.3**
+
+### Property 12: Agent tools reject unauthenticated calls (RED)
+
+*For any* agent tool (list_users, list_documents, list_secret_agents, get_document_by_id, delete_document_by_id, get_internal_config), invoking the tool without a valid authentication context SHALL result in an error or refusal. RED: currently all tools execute without any auth check, will FAIL.
+
+**Validates: Requirements 7.1, 7.2, 7.3, 7.5**
+
+### Property 13: delete_document_by_id checks ownership (RED)
+
+*For any* document and any caller, `delete_document_by_id` SHALL verify that the caller owns the document before deleting it. RED: currently deletes with user_id=None (no ownership check), will FAIL.
+
+**Validates: Requirement 7.4**
+
+### Property 14: Upload rejects disallowed file extensions (RED)
+
+*For any* file with an extension not in the allowed list (e.g., .exe, .sh, .php, .bat), `save_upload` SHALL reject the upload. RED: currently accepts any file type, will FAIL.
+
+**Validates: Requirement 11.1**
+
+### Property 15: Upload rejects oversized files (RED)
+
+*For any* file exceeding the size limit (e.g., 10MB), `save_upload` SHALL reject the upload. RED: currently accepts any file size, will FAIL.
+
+**Validates: Requirement 11.2**
+
+### Property 16: Upload sanitizes filenames (RED)
+
+*For any* filename containing path traversal sequences (e.g., `../`, `..\\`), `save_upload` SHALL sanitize the filename so the saved path contains no traversal characters. RED: currently uses filename with only uuid prefix, will FAIL.
 
 **Validates: Requirement 11.3**
 
-### Property 11: Chunk text respects size limit
+### Property 17: Unknown file extensions return empty text
+
+*For any* file path whose extension is not in the set {.txt, .csv, .pdf, .doc, .docx, .png, .jpg, .jpeg, .gif, .webp, .bmp, .tiff, .tif} and is not empty, `extract_text(file_path)` SHALL return an empty string.
+
+**Validates: Requirement 11.6**
+
+### Property 18: add_chunk sanitizes content (RED)
+
+*For any* content string containing prompt injection payloads, `add_chunk` SHALL sanitize the content before storing it in the vector store. RED: currently stores content verbatim, will FAIL.
+
+**Validates: Requirement 12.1**
+
+### Property 19: add_chunk validates source parameter (RED)
+
+*For any* source string containing path traversal or injection characters, `add_chunk` SHALL validate and sanitize the source before storing. RED: currently accepts any source string, will FAIL.
+
+**Validates: Requirement 12.2**
+
+### Property 20: Chunk text respects size limit
 
 *For any* non-empty text string and *any* chunk_size > 0, every chunk returned by `_chunk_text(text, chunk_size)` SHALL have length less than or equal to `chunk_size`.
 
-**Validates: Requirement 12.3**
+**Validates: Requirement 12.4**
 
-### Property 12: Diverse search balances across sources
+### Property 21: Diverse search balances across sources
 
 *For any* set of Qdrant search results grouped by source, `search_diverse` SHALL return at most `top_k_per_source` chunks from each individual source.
 
-**Validates: Requirement 12.5**
+**Validates: Requirement 12.6**
 
-### Property 13: Cosine similarity is bounded
+### Property 22: Cosine similarity is bounded
 
 *For any* two equal-length non-zero float vectors, `cosine_similarity(a, b)` SHALL return a value in the range [-1.0, 1.0].
 
 **Validates: Requirement 13.5**
 
-### Property 14: Whitespace-only text returns empty embedding
+### Property 23: Whitespace-only text returns empty embedding
 
 *For any* string composed entirely of whitespace characters (spaces, tabs, newlines), `embed_text(text)` SHALL return an empty list.
 
 **Validates: Requirement 13.2**
+
+### Property 24: Backup codes are single-use (RED)
+
+*For any* valid backup code, after it is used once for MFA verification, using the same code again SHALL fail. RED: currently backup codes are reusable indefinitely, will FAIL.
+
+**Validates: Requirement 10.3**
+
+### Property 25: CSRF protection on state-changing endpoints (RED)
+
+*For any* state-changing POST endpoint (/api/chat, /api/agent/chat, /api/rag/chunks, /api/documents/upload, etc.), calling the endpoint without a valid CSRF token SHALL be rejected. RED: currently no CSRF protection exists, will FAIL.
+
+**Validates: Requirement 17.17**
 
 ## Error Handling
 
