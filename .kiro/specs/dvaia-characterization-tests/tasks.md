@@ -143,3 +143,57 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - **Property 9: HTML stripping removes all tags**
     - For any HTML string, `_strip_html` returns a string containing no `<` or `>` characters
     - **Validates: Requirement 4.6**
+
+- [ ] 7. Checkpoint - Verify auth and fetch layer tests
+  - Ensure all GREEN tests pass and RED tests fail as expected, ask the user if questions arise.
+
+- [ ] 8. Template injection and chat orchestration tests
+  - [ ] 8.1 Implement template injection RED tests in `tests/test_server.py` (`TestChatWithTemplate`)
+    - RED: Test `_build_prompt_from_template` neutralizes template-breaking characters (`}}`, `{{`) — will FAIL
+    - RED: Test `_build_prompt_from_template` escapes special characters before substitution — will FAIL
+    - RED: Test `/api/chat-with-template` sanitizes user_input before constructing prompt — will FAIL
+    - Test `/api/chat-with-template` with empty template returns HTTP 400
+    - _Requirements: 5.1, 5.2, 5.3, 5.4_
+
+  - [ ]* 8.2 Write property test for template substitution sanitization (RED)
+    - **Property 10: Template substitution sanitizes user input**
+    - For any template with `{{user_input}}` and any user_input with template-breaking chars, constructed prompt does not contain raw injection payload
+    - **Validates: Requirements 5.1, 5.2**
+
+  - [ ] 8.3 Implement context injection RED tests in `tests/test_chat.py` (`TestHandleChat`)
+    - Test direct prompt (no context_from) passes prompt to `generate` without modification
+    - Test messages list passes directly to `generate`, prompt ignored
+    - RED: Test document context (context_from="upload") sanitizes document text before prepending — will FAIL
+    - RED: Test URL context (context_from="url") sanitizes fetched content before prepending — will FAIL
+    - RED: Test RAG context (context_from="rag") sanitizes retrieved chunks before prepending — will FAIL
+    - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
+
+  - [ ]* 8.4 Write property test for context injection sanitization (RED)
+    - **Property 11: Context injection sanitization**
+    - For any document/URL/RAG content containing prompt injection payloads, `handle_chat` sanitizes before prepending
+    - **Validates: Requirements 6.1, 6.2, 6.3**
+
+- [ ] 9. Agent layer tests (`tests/test_agent.py`)
+  - [ ] 9.1 Implement agent tools authentication RED tests
+    - RED: Test `list_users` tool rejects unauthenticated calls — will FAIL
+    - RED: Test `list_documents` tool rejects unauthenticated calls — will FAIL
+    - RED: Test `list_secret_agents` tool rejects unauthenticated calls — will FAIL
+    - RED: Test `delete_document_by_id` verifies caller owns document before deleting — will FAIL
+    - RED: Test any agent tool rejects calls without valid session — will FAIL
+    - Test `run_agent` returns dict with keys text, thinking, messages, tool_calls
+    - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6_
+
+  - [ ]* 9.2 Write property test for agent tools auth (RED)
+    - **Property 12: Agent tools reject unauthenticated calls**
+    - For any agent tool, invoking without valid auth context results in error or refusal
+    - **Validates: Requirements 7.1, 7.2, 7.3, 7.5**
+
+  - [ ]* 9.3 Write property test for delete_document_by_id ownership (RED)
+    - **Property 13: delete_document_by_id checks ownership**
+    - For any document and any caller, `delete_document_by_id` verifies ownership before deleting
+    - **Validates: Requirement 7.4**
+
+  - [ ] 9.4 Implement internal config protection RED tests
+    - RED: Test `get_internal_config` does NOT include API key values in returned data — will FAIL
+    - RED: Test `get_internal_config` rejects unauthenticated calls — will FAIL
+    - _Requirements: 8.1, 8.2_
