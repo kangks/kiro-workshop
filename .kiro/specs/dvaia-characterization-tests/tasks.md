@@ -62,7 +62,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any valid username and password_hash, `create_user` then `get_user_by_id` returns matching data
     - **Validates: Requirements 2.10, 2.11**
 
-  - [-] 3.6 Implement `TestDocumentCrud` — document CRUD operations
+  - [x] 3.6 Implement `TestDocumentCrud` — document CRUD operations
     - Test `insert_document` inserts new document row and returns new id
     - Test `get_document` with user_id filters by both document_id and user_id
     - Test `get_document` with user_id=None returns document regardless of ownership
@@ -77,7 +77,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any valid user_id, filename, file_path, extracted_text, `insert_document` then `get_document` returns matching data
     - **Validates: Requirement 2.13**
 
-  - [~] 3.8 Implement `TestSecretAgentCrud` — secret agent CRUD operations
+  - [-] 3.8 Implement `TestSecretAgentCrud` — secret agent CRUD operations
     - Test `list_secret_agents` returns all agents ordered by created_at ascending
     - Test `get_secret_agent` with valid id returns matching agent dict
     - Test `insert_secret_agent` inserts new agent row and returns new id
