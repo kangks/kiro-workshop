@@ -174,7 +174,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - **Validates: Requirements 6.1, 6.2, 6.3**
 
 - [-] 9. Agent layer tests (`tests/test_agent.py`)
-  - [-] 9.1 Implement agent tools authentication RED tests
+  - [x] 9.1 Implement agent tools authentication RED tests
     - RED: Test `list_users` tool rejects unauthenticated calls — will FAIL
     - RED: Test `list_documents` tool rejects unauthenticated calls — will FAIL
     - RED: Test `list_secret_agents` tool rejects unauthenticated calls — will FAIL
@@ -193,7 +193,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any document and any caller, `delete_document_by_id` verifies ownership before deleting
     - **Validates: Requirement 7.4**
 
-  - [~] 9.4 Implement internal config protection RED tests
+  - [-] 9.4 Implement internal config protection RED tests
     - RED: Test `get_internal_config` does NOT include API key values in returned data — will FAIL
     - RED: Test `get_internal_config` rejects unauthenticated calls — will FAIL
     - _Requirements: 8.1, 8.2_
