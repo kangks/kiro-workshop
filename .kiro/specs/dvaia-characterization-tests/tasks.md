@@ -337,13 +337,13 @@ Build a comprehensive security characterization test suite for the DVAIA applica
 - [x] 18. Checkpoint - Verify embeddings, vector store, LLM, and models tests
   - Ensure all characterization tests pass, ask the user if questions arise.
 
-- [-] 19. API route security contract tests (`tests/test_server.py`)
-  - [-] 19.1 Implement `TestHealthAndModels` — basic route contracts
+- [x] 19. API route security contract tests (`tests/test_server.py`)
+  - [x] 19.1 Implement `TestHealthAndModels` — basic route contracts
     - Test GET `/api/health` returns HTTP 200 with `{"status": "ok"}`
     - Test GET `/api/models` returns HTTP 200 with keys default, agentic_model, format, examples
     - _Requirements: 17.1, 17.2_
 
-  - [~] 19.2 Implement `TestAuthRoutes` — login/logout/session contracts
+  - [x] 19.2 Implement `TestAuthRoutes` — login/logout/session contracts
     - Test POST `/api/login` with valid credentials returns HTTP 200 with ok, user_id, username, role
     - Test POST `/api/login` with missing fields returns HTTP 400
     - Test POST `/api/login` with invalid credentials returns HTTP 401
@@ -352,20 +352,20 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - Test GET `/api/session` while not logged in returns `{"user": null}`
     - _Requirements: 17.3, 17.4, 17.5, 17.6, 17.7, 17.8_
 
-  - [~] 19.3 Implement `TestMfaRoute` — MFA route contracts
+  - [x] 19.3 Implement `TestMfaRoute` — MFA route contracts
     - Test POST `/api/mfa` with valid code while logged in sets mfa_verified=True
     - Test POST `/api/mfa` with invalid code returns HTTP 401
     - Test POST `/api/mfa` while not logged in returns HTTP 401
     - _Requirements: 17.9, 17.10, 17.11_
 
-  - [~] 19.4 Implement `TestChatRoute` — chat route contracts
+  - [x] 19.4 Implement `TestChatRoute` — chat route contracts
     - Test POST `/api/chat` with prompt returns HTTP 200 with response and thinking
     - Test POST `/api/chat` without prompt or messages returns HTTP 400
     - RED: Test POST `/api/chat` without authentication requires auth — will FAIL
     - RED: Test POST `/api/agent/chat` without authentication returns HTTP 401 — will FAIL
     - _Requirements: 17.12, 17.13, 17.14, 17.15_
 
-  - [~] 19.5 Implement `TestDocumentRoutes` — document route contracts
+  - [x] 19.5 Implement `TestDocumentRoutes` — document route contracts
     - Test POST `/api/documents/upload` with file returns HTTP 200 with document_id
     - Test POST `/api/documents/upload` without file returns HTTP 400
     - Test GET `/api/documents` returns HTTP 200 with documents list
@@ -373,20 +373,20 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - Test DELETE `/api/documents/<id>` while not logged in returns HTTP 401
     - _Requirements: 17.19, 17.20, 17.21, 17.22, 17.23_
 
-  - [~] 19.6 Implement `TestRagRoutes` — RAG route contracts
+  - [x] 19.6 Implement `TestRagRoutes` — RAG route contracts
     - Test GET `/api/rag/search` with empty query returns `{"chunks": []}`
     - Test GET `/api/rag/chunks` returns HTTP 200 with chunks list
     - RED: Test POST `/api/rag/chunks` without authentication returns HTTP 401 — will FAIL
     - Test POST `/api/rag/delete-by-source` while not logged in returns HTTP 401
     - _Requirements: 17.24, 17.25, 17.16, 17.26_
 
-  - [~] 19.7 Implement `TestPayloadRoutes` — payload route contracts
+  - [x] 19.7 Implement `TestPayloadRoutes` — payload route contracts
     - Test POST `/api/payloads/generate` with asset_type="text" returns HTTP 200 with path and relative_path
     - Test POST `/api/payloads/generate` with unknown asset_type returns HTTP 400
     - Test GET `/api/payloads/list` returns HTTP 200 with files list
     - _Requirements: 17.27, 17.28, 17.29_
 
-  - [~] 19.8 Implement RED tests for CSRF and secure cookies
+  - [x] 19.8 Implement RED tests for CSRF and secure cookies
     - RED: Test any state-changing POST endpoint verifies CSRF token — will FAIL
     - RED: Test session cookie includes HttpOnly, Secure, and SameSite flags — will FAIL
     - _Requirements: 17.17, 17.18_
@@ -396,7 +396,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any state-changing POST endpoint, calling without valid CSRF token is rejected
     - **Validates: Requirement 17.17**
 
-- [ ] 20. Final checkpoint - Ensure all tests pass
+- [-] 20. Final checkpoint - Ensure all tests pass
   - Ensure all GREEN characterization tests pass and all RED security tests fail as expected, ask the user if questions arise.
 
 ## Notes
