@@ -6,8 +6,8 @@ Build a comprehensive security characterization test suite for the DVAIA applica
 
 ## Tasks
 
-- [ ] 1. Set up test infrastructure and configuration
-  - [ ] 1.1 Create `DVAIA-Damn-Vulnerable-AI-Application/tests/conftest.py` with shared fixtures
+- [-] 1. Set up test infrastructure and configuration
+  - [-] 1.1 Create `DVAIA-Damn-Vulnerable-AI-Application/tests/conftest.py` with shared fixtures
     - Implement `db_path` fixture returning a unique temporary SQLite file path under `tmp_path`
     - Implement `db_session` fixture that creates all 5 tables with seed data and patches `app.config.get_database_uri`
     - Implement `flask_client` fixture returning Flask test client with `TESTING=True`, patched DB, Mock_LLM, Mock_Qdrant, Mock_Embeddings
@@ -19,7 +19,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - Ensure no unit test makes network calls to Ollama, Qdrant, or any external HTTP service
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.10_
 
-  - [ ] 1.2 Create `DVAIA-Damn-Vulnerable-AI-Application/pytest.ini` or `pyproject.toml` pytest config
+  - [~] 1.2 Create `DVAIA-Damn-Vulnerable-AI-Application/pytest.ini` or `pyproject.toml` pytest config
     - Register markers: `unit`, `integration`
     - Set default test path to `tests/`
     - Configure hypothesis settings (max_examples=100)
@@ -29,7 +29,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
   - Ensure conftest.py fixtures load without errors, ask the user if questions arise.
 
 - [ ] 3. Database layer characterization tests (`tests/test_db.py`)
-  - [ ] 3.1 Implement `TestInitDb` — schema creation and seed data validation
+  - [~] 3.1 Implement `TestInitDb` — schema creation and seed data validation
     - Test all 5 tables exist after `init_db()`
     - Test seeded user test with username "test" and role "user"
     - Test seeded MFA code for user_id 1
@@ -43,13 +43,13 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any number of consecutive `init_db()` calls, DB contains exactly 1 user, 1 MFA code, 3 backup codes, 3 secret agents
     - **Validates: Requirement 2.7**
 
-  - [ ] 3.3 Implement `TestInitDb` RED tests — seed data security assertions
+  - [~] 3.3 Implement `TestInitDb` RED tests — seed data security assertions
     - Test seeded password_hash is bcrypt or argon2, NOT SHA256 hex digest — RED: currently SHA256, will FAIL
     - Test seeded MFA code is cryptographically random, NOT static "123456" — RED: currently static, will FAIL
     - Test seeded backup codes are cryptographically random, NOT static "backup1/backup2/backup3" — RED: currently static, will FAIL
     - _Requirements: 2.3, 2.4, 2.5_
 
-  - [ ] 3.4 Implement `TestUserCrud` — user CRUD operations
+  - [~] 3.4 Implement `TestUserCrud` — user CRUD operations
     - Test `get_user_by_username` with existing username returns dict with keys id, username, password_hash, role, created_at
     - Test `get_user_by_username` with non-existent username returns None
     - Test `get_user_by_id` with valid id returns matching user dict
@@ -62,7 +62,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any valid username and password_hash, `create_user` then `get_user_by_id` returns matching data
     - **Validates: Requirements 2.10, 2.11**
 
-  - [ ] 3.6 Implement `TestDocumentCrud` — document CRUD operations
+  - [~] 3.6 Implement `TestDocumentCrud` — document CRUD operations
     - Test `insert_document` inserts new document row and returns new id
     - Test `get_document` with user_id filters by both document_id and user_id
     - Test `get_document` with user_id=None returns document regardless of ownership
@@ -77,7 +77,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any valid user_id, filename, file_path, extracted_text, `insert_document` then `get_document` returns matching data
     - **Validates: Requirement 2.13**
 
-  - [ ] 3.8 Implement `TestSecretAgentCrud` — secret agent CRUD operations
+  - [~] 3.8 Implement `TestSecretAgentCrud` — secret agent CRUD operations
     - Test `list_secret_agents` returns all agents ordered by created_at ascending
     - Test `get_secret_agent` with valid id returns matching agent dict
     - Test `insert_secret_agent` inserts new agent row and returns new id
@@ -94,7 +94,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
   - Ensure all DB characterization tests pass (GREEN tests) and RED tests fail as expected, ask the user if questions arise.
 
 - [ ] 5. Auth layer tests (`tests/test_auth.py`)
-  - [ ] 5.1 Implement `TestPasswordHashing` — characterize current SHA256 behavior and RED secure assertions
+  - [~] 5.1 Implement `TestPasswordHashing` — characterize current SHA256 behavior and RED secure assertions
     - Test `check_password` with correct password returns True
     - Test `check_password` with wrong password returns False
     - RED: Test `hash_password` returns bcrypt or argon2 hash (not 64-char SHA256 hex) — will FAIL
@@ -112,14 +112,14 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any two strings p1 and p2, `check_password(hash_password(p1), p2)` returns True iff p1 == p2
     - **Validates: Requirements 3.4, 3.5**
 
-  - [ ] 5.4 Implement `TestLogin` — login flow characterization
+  - [~] 5.4 Implement `TestLogin` — login flow characterization
     - Test `login` with valid credentials (test/test) returns user dict with id, username, password_hash, role, created_at
     - Test `login` with wrong password returns None
     - Test `login` with non-existent username returns None
     - _Requirements: 3.6, 3.7, 3.8_
 
 - [ ] 6. Fetch layer tests (`tests/test_fetch.py`)
-  - [ ] 6.1 Implement `TestFetchUrlToText` — characterize current behavior and RED SSRF assertions
+  - [~] 6.1 Implement `TestFetchUrlToText` — characterize current behavior and RED SSRF assertions
     - Test non-http schemes (ftp://, file://) return empty string
     - Test HTML stripping removes script, style, and HTML tags
     - Test network error returns empty string
@@ -148,7 +148,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
   - Ensure all GREEN tests pass and RED tests fail as expected, ask the user if questions arise.
 
 - [ ] 8. Template injection and chat orchestration tests
-  - [ ] 8.1 Implement template injection RED tests in `tests/test_server.py` (`TestChatWithTemplate`)
+  - [~] 8.1 Implement template injection RED tests in `tests/test_server.py` (`TestChatWithTemplate`)
     - RED: Test `_build_prompt_from_template` neutralizes template-breaking characters (`}}`, `{{`) — will FAIL
     - RED: Test `_build_prompt_from_template` escapes special characters before substitution — will FAIL
     - RED: Test `/api/chat-with-template` sanitizes user_input before constructing prompt — will FAIL
@@ -160,7 +160,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any template with `{{user_input}}` and any user_input with template-breaking chars, constructed prompt does not contain raw injection payload
     - **Validates: Requirements 5.1, 5.2**
 
-  - [ ] 8.3 Implement context injection RED tests in `tests/test_chat.py` (`TestHandleChat`)
+  - [~] 8.3 Implement context injection RED tests in `tests/test_chat.py` (`TestHandleChat`)
     - Test direct prompt (no context_from) passes prompt to `generate` without modification
     - Test messages list passes directly to `generate`, prompt ignored
     - RED: Test document context (context_from="upload") sanitizes document text before prepending — will FAIL
@@ -174,7 +174,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - **Validates: Requirements 6.1, 6.2, 6.3**
 
 - [ ] 9. Agent layer tests (`tests/test_agent.py`)
-  - [ ] 9.1 Implement agent tools authentication RED tests
+  - [~] 9.1 Implement agent tools authentication RED tests
     - RED: Test `list_users` tool rejects unauthenticated calls — will FAIL
     - RED: Test `list_documents` tool rejects unauthenticated calls — will FAIL
     - RED: Test `list_secret_agents` tool rejects unauthenticated calls — will FAIL
@@ -193,7 +193,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any document and any caller, `delete_document_by_id` verifies ownership before deleting
     - **Validates: Requirement 7.4**
 
-  - [ ] 9.4 Implement internal config protection RED tests
+  - [~] 9.4 Implement internal config protection RED tests
     - RED: Test `get_internal_config` does NOT include API key values in returned data — will FAIL
     - RED: Test `get_internal_config` rejects unauthenticated calls — will FAIL
     - _Requirements: 8.1, 8.2_
@@ -202,12 +202,12 @@ Build a comprehensive security characterization test suite for the DVAIA applica
   - Ensure all GREEN tests pass and RED tests fail as expected, ask the user if questions arise.
 
 - [ ] 11. Secret key and MFA tests
-  - [ ] 11.1 Implement secret key RED tests in `tests/test_server.py` (`TestSecretKey`)
+  - [~] 11.1 Implement secret key RED tests in `tests/test_server.py` (`TestSecretKey`)
     - RED: Test `get_secret_key` without SECRET_KEY env var does NOT return "dev-secret-change-in-production" — will FAIL
     - RED: Test `get_secret_key` returns a cryptographically generated secret of at least 32 characters — will FAIL
     - _Requirements: 9.1, 9.2_
 
-  - [ ] 11.2 Implement MFA RED tests in `tests/test_mfa.py` (`TestMfaVerification`)
+  - [~] 11.2 Implement MFA RED tests in `tests/test_mfa.py` (`TestMfaVerification`)
     - Test `verify_code` with invalid code returns False
     - RED: Test `verify_code` with static code "123456" is rejected — will FAIL
     - RED: Test backup code is consumed (deleted) after single use — will FAIL
@@ -221,14 +221,14 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - **Validates: Requirement 10.3**
 
 - [ ] 12. Document upload validation tests (`tests/test_documents.py`)
-  - [ ] 12.1 Implement `TestExtractText` — text extraction characterization
+  - [~] 12.1 Implement `TestExtractText` — text extraction characterization
     - Test `extract_text` with .txt file reads and returns content
     - Test `extract_text` with .csv file reads and returns content
     - Test `extract_text` with unknown extension returns empty string
     - Test `extract_text` with read error returns empty string
     - _Requirements: 11.4, 11.5, 11.6, 11.7_
 
-  - [ ] 12.2 Implement `TestSaveUpload` — upload characterization and RED validation assertions
+  - [~] 12.2 Implement `TestSaveUpload` — upload characterization and RED validation assertions
     - Test `delete_document` removes file from disk and database row
     - Test `list_documents` returns documents for given user_id
     - RED: Test `save_upload` rejects disallowed file extensions (.exe, .sh, .php) — will FAIL
@@ -257,7 +257,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - **Validates: Requirement 11.6**
 
 - [ ] 13. RAG retrieval sanitization tests (`tests/test_retrieval.py`)
-  - [ ] 13.1 Implement retrieval characterization and RED sanitization tests
+  - [~] 13.1 Implement retrieval characterization and RED sanitization tests
     - Test `add_document` splits text into chunks and stores each
     - Test `_chunk_text` returns chunks within size limit
     - Test `search` embeds query and returns content strings
@@ -292,7 +292,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
   - Ensure all GREEN tests pass and RED tests fail as expected, ask the user if questions arise.
 
 - [ ] 15. Embeddings layer characterization tests (`tests/test_embeddings.py`)
-  - [ ] 15.1 Implement embeddings characterization tests
+  - [~] 15.1 Implement embeddings characterization tests
     - Test `embed_text` with non-empty string returns list of floats from mocked model
     - Test `embed_text` with empty or whitespace-only string returns empty list
     - Test `embed_texts` with list of non-empty strings returns list of float vectors
@@ -312,7 +312,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - **Validates: Requirement 13.2**
 
 - [ ] 16. Vector store layer characterization tests (`tests/test_vector_store.py`)
-  - [ ] 16.1 Implement vector store characterization tests
+  - [~] 16.1 Implement vector store characterization tests
     - Test `add_point` with source, content, and non-empty vector calls Qdrant upsert and returns UUID string
     - Test `add_point` with empty vector raises ValueError
     - Test `search` with query vector calls Qdrant query_points and returns payload dicts without score
@@ -322,13 +322,13 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6_
 
 - [ ] 17. Core LLM and models characterization tests
-  - [ ] 17.1 Implement core LLM factory tests in `tests/test_llm.py`
+  - [~] 17.1 Implement core LLM factory tests in `tests/test_llm.py`
     - Test `get_llm` with "ollama:" prefix strips prefix and creates ChatOllama with correct model name
     - Test `get_llm` without prefix creates ChatOllama using model_id directly
     - Test `get_llm` with None or empty model_id falls back to DEFAULT_MODEL
     - _Requirements: 15.1, 15.2, 15.3_
 
-  - [ ] 17.2 Implement core models generate tests in `tests/test_models.py`
+  - [~] 17.2 Implement core models generate tests in `tests/test_models.py`
     - Test `generate` with prompt string invokes LLM with HumanMessage and returns `{"text": str, "thinking": ""}`
     - Test `generate` with messages list converts to LangChain format and invokes LLM
     - Test `generate` with options (num_predict, temperature) passes through to LLM constructor
@@ -338,12 +338,12 @@ Build a comprehensive security characterization test suite for the DVAIA applica
   - Ensure all characterization tests pass, ask the user if questions arise.
 
 - [ ] 19. API route security contract tests (`tests/test_server.py`)
-  - [ ] 19.1 Implement `TestHealthAndModels` — basic route contracts
+  - [~] 19.1 Implement `TestHealthAndModels` — basic route contracts
     - Test GET `/api/health` returns HTTP 200 with `{"status": "ok"}`
     - Test GET `/api/models` returns HTTP 200 with keys default, agentic_model, format, examples
     - _Requirements: 17.1, 17.2_
 
-  - [ ] 19.2 Implement `TestAuthRoutes` — login/logout/session contracts
+  - [~] 19.2 Implement `TestAuthRoutes` — login/logout/session contracts
     - Test POST `/api/login` with valid credentials returns HTTP 200 with ok, user_id, username, role
     - Test POST `/api/login` with missing fields returns HTTP 400
     - Test POST `/api/login` with invalid credentials returns HTTP 401
@@ -352,20 +352,20 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - Test GET `/api/session` while not logged in returns `{"user": null}`
     - _Requirements: 17.3, 17.4, 17.5, 17.6, 17.7, 17.8_
 
-  - [ ] 19.3 Implement `TestMfaRoute` — MFA route contracts
+  - [~] 19.3 Implement `TestMfaRoute` — MFA route contracts
     - Test POST `/api/mfa` with valid code while logged in sets mfa_verified=True
     - Test POST `/api/mfa` with invalid code returns HTTP 401
     - Test POST `/api/mfa` while not logged in returns HTTP 401
     - _Requirements: 17.9, 17.10, 17.11_
 
-  - [ ] 19.4 Implement `TestChatRoute` — chat route contracts
+  - [~] 19.4 Implement `TestChatRoute` — chat route contracts
     - Test POST `/api/chat` with prompt returns HTTP 200 with response and thinking
     - Test POST `/api/chat` without prompt or messages returns HTTP 400
     - RED: Test POST `/api/chat` without authentication requires auth — will FAIL
     - RED: Test POST `/api/agent/chat` without authentication returns HTTP 401 — will FAIL
     - _Requirements: 17.12, 17.13, 17.14, 17.15_
 
-  - [ ] 19.5 Implement `TestDocumentRoutes` — document route contracts
+  - [~] 19.5 Implement `TestDocumentRoutes` — document route contracts
     - Test POST `/api/documents/upload` with file returns HTTP 200 with document_id
     - Test POST `/api/documents/upload` without file returns HTTP 400
     - Test GET `/api/documents` returns HTTP 200 with documents list
@@ -373,20 +373,20 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - Test DELETE `/api/documents/<id>` while not logged in returns HTTP 401
     - _Requirements: 17.19, 17.20, 17.21, 17.22, 17.23_
 
-  - [ ] 19.6 Implement `TestRagRoutes` — RAG route contracts
+  - [~] 19.6 Implement `TestRagRoutes` — RAG route contracts
     - Test GET `/api/rag/search` with empty query returns `{"chunks": []}`
     - Test GET `/api/rag/chunks` returns HTTP 200 with chunks list
     - RED: Test POST `/api/rag/chunks` without authentication returns HTTP 401 — will FAIL
     - Test POST `/api/rag/delete-by-source` while not logged in returns HTTP 401
     - _Requirements: 17.24, 17.25, 17.16, 17.26_
 
-  - [ ] 19.7 Implement `TestPayloadRoutes` — payload route contracts
+  - [~] 19.7 Implement `TestPayloadRoutes` — payload route contracts
     - Test POST `/api/payloads/generate` with asset_type="text" returns HTTP 200 with path and relative_path
     - Test POST `/api/payloads/generate` with unknown asset_type returns HTTP 400
     - Test GET `/api/payloads/list` returns HTTP 200 with files list
     - _Requirements: 17.27, 17.28, 17.29_
 
-  - [ ] 19.8 Implement RED tests for CSRF and secure cookies
+  - [~] 19.8 Implement RED tests for CSRF and secure cookies
     - RED: Test any state-changing POST endpoint verifies CSRF token — will FAIL
     - RED: Test session cookie includes HttpOnly, Secure, and SameSite flags — will FAIL
     - _Requirements: 17.17, 17.18_
