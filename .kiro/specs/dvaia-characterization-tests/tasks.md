@@ -321,24 +321,24 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - Test `delete_by_source` calls Qdrant delete with source filter
     - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6_
 
-- [-] 17. Core LLM and models characterization tests
+- [x] 17. Core LLM and models characterization tests
   - [x] 17.1 Implement core LLM factory tests in `tests/test_llm.py`
     - Test `get_llm` with "ollama:" prefix strips prefix and creates ChatOllama with correct model name
     - Test `get_llm` without prefix creates ChatOllama using model_id directly
     - Test `get_llm` with None or empty model_id falls back to DEFAULT_MODEL
     - _Requirements: 15.1, 15.2, 15.3_
 
-  - [-] 17.2 Implement core models generate tests in `tests/test_models.py`
+  - [x] 17.2 Implement core models generate tests in `tests/test_models.py`
     - Test `generate` with prompt string invokes LLM with HumanMessage and returns `{"text": str, "thinking": ""}`
     - Test `generate` with messages list converts to LangChain format and invokes LLM
     - Test `generate` with options (num_predict, temperature) passes through to LLM constructor
     - _Requirements: 16.1, 16.2, 16.3_
 
-- [ ] 18. Checkpoint - Verify embeddings, vector store, LLM, and models tests
+- [x] 18. Checkpoint - Verify embeddings, vector store, LLM, and models tests
   - Ensure all characterization tests pass, ask the user if questions arise.
 
-- [ ] 19. API route security contract tests (`tests/test_server.py`)
-  - [~] 19.1 Implement `TestHealthAndModels` — basic route contracts
+- [-] 19. API route security contract tests (`tests/test_server.py`)
+  - [-] 19.1 Implement `TestHealthAndModels` — basic route contracts
     - Test GET `/api/health` returns HTTP 200 with `{"status": "ok"}`
     - Test GET `/api/models` returns HTTP 200 with keys default, agentic_model, format, examples
     - _Requirements: 17.1, 17.2_
