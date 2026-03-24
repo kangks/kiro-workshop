@@ -696,16 +696,27 @@ All characterization tests mock every external dependency:
 - Property 2: `create_user` round-trip — create then get returns matching data
 - Property 3: `insert_document` round-trip — insert then get returns matching data
 - Property 4: `insert_secret_agent` round-trip — insert then get returns matching data
-- Property 5: `hash_password` — output equals `hashlib.sha256(p.encode()).hexdigest()` for all strings
+- Property 5: `hash_password` uses salted hashing — output is bcrypt/argon2, not SHA256 (RED)
 - Property 6: `check_password` round-trip — `check_password(hash_password(p1), p2) == (p1 == p2)`
-- Property 7: `fetch_url_to_text` — non-http schemes always return ""
-- Property 8: `_strip_html` — no `<` or `>` in output for any HTML input
-- Property 9: `_build_prompt_from_template` — verbatim substitution equals `str.replace`
-- Property 10: `extract_text` — unknown extensions return ""
-- Property 11: `_chunk_text` — all chunks ≤ chunk_size for any text and chunk_size > 0
-- Property 12: `search_diverse` — at most top_k_per_source per source
-- Property 13: `cosine_similarity` — bounded in [-1, 1] for valid vectors
-- Property 14: `embed_text` — whitespace-only strings return []
+- Property 7: SSRF protection — private/internal IPs rejected (RED)
+- Property 8: `fetch_url_to_text` — non-http schemes always return ""
+- Property 9: `_strip_html` — no `<` or `>` in output for any HTML input
+- Property 10: `_build_prompt_from_template` — sanitizes template-breaking characters (RED)
+- Property 11: `handle_chat` — sanitizes external context before prepending (RED)
+- Property 12: Agent tools — reject unauthenticated calls (RED)
+- Property 13: `delete_document_by_id` — checks ownership before deleting (RED)
+- Property 14: `save_upload` — rejects disallowed file extensions (RED)
+- Property 15: `save_upload` — rejects oversized files (RED)
+- Property 16: `save_upload` — sanitizes filenames with path traversal (RED)
+- Property 17: `extract_text` — unknown extensions return ""
+- Property 18: `add_chunk` — sanitizes content before storing (RED)
+- Property 19: `add_chunk` — validates source parameter (RED)
+- Property 20: `_chunk_text` — all chunks ≤ chunk_size for any text and chunk_size > 0
+- Property 21: `search_diverse` — at most top_k_per_source per source
+- Property 22: `cosine_similarity` — bounded in [-1, 1] for valid vectors
+- Property 23: `embed_text` — whitespace-only strings return []
+- Property 24: Backup codes — single-use, consumed after verification (RED)
+- Property 25: CSRF protection — state-changing endpoints require CSRF token (RED)
 
 ### Integration Testing Approach
 Tagged `@pytest.mark.integration`, excluded from default run. Requires live Ollama + Qdrant.
