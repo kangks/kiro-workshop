@@ -221,14 +221,14 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - **Validates: Requirement 10.3**
 
 - [-] 12. Document upload validation tests (`tests/test_documents.py`)
-  - [-] 12.1 Implement `TestExtractText` — text extraction characterization
+  - [x] 12.1 Implement `TestExtractText` — text extraction characterization
     - Test `extract_text` with .txt file reads and returns content
     - Test `extract_text` with .csv file reads and returns content
     - Test `extract_text` with unknown extension returns empty string
     - Test `extract_text` with read error returns empty string
     - _Requirements: 11.4, 11.5, 11.6, 11.7_
 
-  - [~] 12.2 Implement `TestSaveUpload` — upload characterization and RED validation assertions
+  - [-] 12.2 Implement `TestSaveUpload` — upload characterization and RED validation assertions
     - Test `delete_document` removes file from disk and database row
     - Test `list_documents` returns documents for given user_id
     - RED: Test `save_upload` rejects disallowed file extensions (.exe, .sh, .php) — will FAIL
