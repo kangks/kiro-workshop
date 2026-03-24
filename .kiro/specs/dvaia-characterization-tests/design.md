@@ -53,3 +53,46 @@ graph TD
     T_AGENT --> V_AGENT_TOOLS
     T_AGENT --> V_DATA
 ```
+
+
+## Sequence Diagrams
+
+### Test Execution Flow: Unit Test with Mocked LLM
+
+```mermaid
+sequenceDiagram
+    participant Test as Test Case
+    participant Fixture as conftest.py
+    participant App as app module
+    participant Mock as Mock LLM/DB
+
+    Test->>Fixture: request db_session fixture
+    Fixture->>Mock: create in-memory SQLite
+    Fixture-->>Test: db connection + seeded data
+    Test->>App: call function under test
+    App->>Mock: query DB / call LLM
+    Mock-->>App: deterministic response
+    App-->>Test: return value
+    Test->>Test: assert matches current behavior
+```
+
+### Test Execution Flow: Flask API Route Test
+
+```mermaid
+sequenceDiagram
+    participant Test as Test Case
+    participant Client as Flask test_client
+    participant Server as api/server.py
+    participant AppLayer as app/*.py
+    participant Mock as Mocked Services
+
+    Test->>Client: POST /api/login {username, password}
+    Client->>Server: route handler
+    Server->>AppLayer: app_auth.login()
+    AppLayer->>Mock: db.get_user_by_username()
+    Mock-->>AppLayer: user dict
+    AppLayer-->>Server: user or None
+    Server-->>Client: JSON response + session
+    Client-->>Test: response object
+    Test->>Test: assert status_code, JSON body, session state
+```
