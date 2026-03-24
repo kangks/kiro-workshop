@@ -173,7 +173,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any document/URL/RAG content containing prompt injection payloads, `handle_chat` sanitizes before prepending
     - **Validates: Requirements 6.1, 6.2, 6.3**
 
-- [-] 9. Agent layer tests (`tests/test_agent.py`)
+- [x] 9. Agent layer tests (`tests/test_agent.py`)
   - [x] 9.1 Implement agent tools authentication RED tests
     - RED: Test `list_users` tool rejects unauthenticated calls — will FAIL
     - RED: Test `list_documents` tool rejects unauthenticated calls — will FAIL
@@ -193,16 +193,16 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any document and any caller, `delete_document_by_id` verifies ownership before deleting
     - **Validates: Requirement 7.4**
 
-  - [-] 9.4 Implement internal config protection RED tests
+  - [x] 9.4 Implement internal config protection RED tests
     - RED: Test `get_internal_config` does NOT include API key values in returned data — will FAIL
     - RED: Test `get_internal_config` rejects unauthenticated calls — will FAIL
     - _Requirements: 8.1, 8.2_
 
-- [ ] 10. Checkpoint - Verify template, chat, and agent layer tests
+- [x] 10. Checkpoint - Verify template, chat, and agent layer tests
   - Ensure all GREEN tests pass and RED tests fail as expected, ask the user if questions arise.
 
-- [ ] 11. Secret key and MFA tests
-  - [~] 11.1 Implement secret key RED tests in `tests/test_server.py` (`TestSecretKey`)
+- [-] 11. Secret key and MFA tests
+  - [-] 11.1 Implement secret key RED tests in `tests/test_server.py` (`TestSecretKey`)
     - RED: Test `get_secret_key` without SECRET_KEY env var does NOT return "dev-secret-change-in-production" — will FAIL
     - RED: Test `get_secret_key` returns a cryptographically generated secret of at least 32 characters — will FAIL
     - _Requirements: 9.1, 9.2_
