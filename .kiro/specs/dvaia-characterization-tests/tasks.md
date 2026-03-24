@@ -49,7 +49,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - Test seeded backup codes are cryptographically random, NOT static "backup1/backup2/backup3" — RED: currently static, will FAIL
     - _Requirements: 2.3, 2.4, 2.5_
 
-  - [-] 3.4 Implement `TestUserCrud` — user CRUD operations
+  - [x] 3.4 Implement `TestUserCrud` — user CRUD operations
     - Test `get_user_by_username` with existing username returns dict with keys id, username, password_hash, role, created_at
     - Test `get_user_by_username` with non-existent username returns None
     - Test `get_user_by_id` with valid id returns matching user dict
@@ -62,7 +62,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any valid username and password_hash, `create_user` then `get_user_by_id` returns matching data
     - **Validates: Requirements 2.10, 2.11**
 
-  - [~] 3.6 Implement `TestDocumentCrud` — document CRUD operations
+  - [-] 3.6 Implement `TestDocumentCrud` — document CRUD operations
     - Test `insert_document` inserts new document row and returns new id
     - Test `get_document` with user_id filters by both document_id and user_id
     - Test `get_document` with user_id=None returns document regardless of ownership
