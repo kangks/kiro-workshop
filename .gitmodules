@@ -1,0 +1,3 @@
+[submodule "DVAIA-Damn-Vulnerable-AI-Application"]
+	path = DVAIA-Damn-Vulnerable-AI-Application
+	url = git@github.com:kangks/DVAIA-Damn-Vulnerable-AI-Application.git
