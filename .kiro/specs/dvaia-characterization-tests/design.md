@@ -507,13 +507,91 @@ def test_no_ssrf_protection(self, mock_requests):
 
 ## Correctness Properties
 
-1. **Isolation**: ∀ test t₁, t₂: execution(t₁) does not affect execution(t₂). Each test gets its own SQLite + mock state.
-2. **No External Dependencies**: ∀ unit test t: completes without network, Ollama, or Qdrant.
-3. **Seed Data Consistency**: ∀ test using db_session: DB contains exactly 1 user, 1 MFA code, 3 backup codes, 3 secret agents.
-4. **Behavioral Documentation**: ∀ public function f in app/core layers: at least one test asserts f's return for known inputs matches current behavior.
-5. **Vulnerability Characterization**: ∀ known vulnerability v: at least one test documents v as current expected behavior.
-6. **API Contract Stability**: ∀ Flask route r: at least one test asserts status code and JSON shape for success and error.
-7. **Mock Determinism**: ∀ mock m: returns same value across all runs.
+*A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+
+### Property 1: init_db seed idempotence
+
+*For any* number of consecutive `init_db()` calls (1, 2, or more), the database SHALL contain exactly 1 user, 1 MFA code, 3 backup codes, and 3 secret agents — seed data is never duplicated.
+
+**Validates: Requirement 2.6**
+
+### Property 2: User CRUD round-trip
+
+*For any* valid username and password_hash string, calling `create_user(username, password_hash)` and then `get_user_by_id(returned_id)` SHALL return a dict where `username` and `password_hash` match the inputs.
+
+**Validates: Requirement 2.10**
+
+### Property 3: Document CRUD round-trip
+
+*For any* valid user_id, filename, file_path, and extracted_text, calling `insert_document(...)` and then `get_document(returned_id, user_id)` SHALL return a dict where filename, file_path, and extracted_text match the inputs.
+
+**Validates: Requirement 2.12**
+
+### Property 4: Secret agent CRUD round-trip
+
+*For any* valid name, handler, and mission strings, calling `insert_secret_agent(name, handler, mission)` and then `get_secret_agent(returned_id)` SHALL return a dict where name, handler, and mission match the inputs.
+
+**Validates: Requirement 2.21**
+
+### Property 5: hash_password is unsalted SHA256
+
+*For any* string `password`, `hash_password(password)` SHALL equal `hashlib.sha256(password.encode("utf-8")).hexdigest()` — a 64-character lowercase hex string with no salt. This characterizes the weak hashing vulnerability.
+
+**Validates: Requirements 3.1, 3.2**
+
+### Property 6: Password check round-trip
+
+*For any* two strings `p1` and `p2`, `check_password(hash_password(p1), p2)` SHALL return `True` if and only if `p1 == p2`. This validates the auth check is consistent with the hash function.
+
+**Validates: Requirements 3.3, 3.4**
+
+### Property 7: Non-http schemes rejected by fetch
+
+*For any* URL string that does not start with "http://" or "https://", `fetch_url_to_text(url)` SHALL return an empty string without making any network request.
+
+**Validates: Requirement 4.3**
+
+### Property 8: HTML stripping removes all tags
+
+*For any* HTML string, `_strip_html(html)` SHALL return a string containing no `<` or `>` characters.
+
+**Validates: Requirement 4.5**
+
+### Property 9: Template substitution is verbatim (no escaping)
+
+*For any* template string containing `{{user_input}}` and *any* user_input string, `_build_prompt_from_template(template, user_input)` SHALL equal `template.replace("{{user_input}}", user_input)` — the substitution is literal with no escaping or sanitization. This characterizes the template injection vulnerability.
+
+**Validates: Requirements 5.1, 5.2**
+
+### Property 10: Unknown file extensions return empty text
+
+*For any* file path whose extension is not in the set {.txt, .csv, .pdf, .doc, .docx, .png, .jpg, .jpeg, .gif, .webp, .bmp, .tiff, .tif} and is not empty, `extract_text(file_path)` SHALL return an empty string.
+
+**Validates: Requirement 11.3**
+
+### Property 11: Chunk text respects size limit
+
+*For any* non-empty text string and *any* chunk_size > 0, every chunk returned by `_chunk_text(text, chunk_size)` SHALL have length less than or equal to `chunk_size`.
+
+**Validates: Requirement 12.3**
+
+### Property 12: Diverse search balances across sources
+
+*For any* set of Qdrant search results grouped by source, `search_diverse` SHALL return at most `top_k_per_source` chunks from each individual source.
+
+**Validates: Requirement 12.5**
+
+### Property 13: Cosine similarity is bounded
+
+*For any* two equal-length non-zero float vectors, `cosine_similarity(a, b)` SHALL return a value in the range [-1.0, 1.0].
+
+**Validates: Requirement 13.5**
+
+### Property 14: Whitespace-only text returns empty embedding
+
+*For any* string composed entirely of whitespace characters (spaces, tabs, newlines), `embed_text(text)` SHALL return an empty list.
+
+**Validates: Requirement 13.2**
 
 ## Error Handling
 
