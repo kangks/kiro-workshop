@@ -396,7 +396,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any state-changing POST endpoint, calling without valid CSRF token is rejected
     - **Validates: Requirement 17.17**
 
-- [-] 20. Final checkpoint - Ensure all tests pass
+- [x] 20. Final checkpoint - Ensure all tests pass
   - Ensure all GREEN characterization tests pass and all RED security tests fail as expected, ask the user if questions arise.
 
 ## Notes
