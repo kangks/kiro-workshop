@@ -6,7 +6,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
 
 ## Tasks
 
-- [-] 1. Set up test infrastructure and configuration
+- [x] 1. Set up test infrastructure and configuration
   - [x] 1.1 Create `DVAIA-Damn-Vulnerable-AI-Application/tests/conftest.py` with shared fixtures
     - Implement `db_path` fixture returning a unique temporary SQLite file path under `tmp_path`
     - Implement `db_session` fixture that creates all 5 tables with seed data and patches `app.config.get_database_uri`
@@ -19,17 +19,17 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - Ensure no unit test makes network calls to Ollama, Qdrant, or any external HTTP service
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.10_
 
-  - [-] 1.2 Create `DVAIA-Damn-Vulnerable-AI-Application/pytest.ini` or `pyproject.toml` pytest config
+  - [x] 1.2 Create `DVAIA-Damn-Vulnerable-AI-Application/pytest.ini` or `pyproject.toml` pytest config
     - Register markers: `unit`, `integration`
     - Set default test path to `tests/`
     - Configure hypothesis settings (max_examples=100)
     - _Requirements: 1.9_
 
-- [ ] 2. Checkpoint - Verify test infrastructure
+- [x] 2. Checkpoint - Verify test infrastructure
   - Ensure conftest.py fixtures load without errors, ask the user if questions arise.
 
-- [ ] 3. Database layer characterization tests (`tests/test_db.py`)
-  - [~] 3.1 Implement `TestInitDb` — schema creation and seed data validation
+- [-] 3. Database layer characterization tests (`tests/test_db.py`)
+  - [-] 3.1 Implement `TestInitDb` — schema creation and seed data validation
     - Test all 5 tables exist after `init_db()`
     - Test seeded user test with username "test" and role "user"
     - Test seeded MFA code for user_id 1
