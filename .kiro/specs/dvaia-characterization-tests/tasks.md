@@ -7,7 +7,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
 ## Tasks
 
 - [-] 1. Set up test infrastructure and configuration
-  - [-] 1.1 Create `DVAIA-Damn-Vulnerable-AI-Application/tests/conftest.py` with shared fixtures
+  - [x] 1.1 Create `DVAIA-Damn-Vulnerable-AI-Application/tests/conftest.py` with shared fixtures
     - Implement `db_path` fixture returning a unique temporary SQLite file path under `tmp_path`
     - Implement `db_session` fixture that creates all 5 tables with seed data and patches `app.config.get_database_uri`
     - Implement `flask_client` fixture returning Flask test client with `TESTING=True`, patched DB, Mock_LLM, Mock_Qdrant, Mock_Embeddings
@@ -19,7 +19,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - Ensure no unit test makes network calls to Ollama, Qdrant, or any external HTTP service
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.10_
 
-  - [~] 1.2 Create `DVAIA-Damn-Vulnerable-AI-Application/pytest.ini` or `pyproject.toml` pytest config
+  - [-] 1.2 Create `DVAIA-Damn-Vulnerable-AI-Application/pytest.ini` or `pyproject.toml` pytest config
     - Register markers: `unit`, `integration`
     - Set default test path to `tests/`
     - Configure hypothesis settings (max_examples=100)
