@@ -311,8 +311,8 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any string of only whitespace characters, `embed_text` returns empty list
     - **Validates: Requirement 13.2**
 
-- [-] 16. Vector store layer characterization tests (`tests/test_vector_store.py`)
-  - [-] 16.1 Implement vector store characterization tests
+- [x] 16. Vector store layer characterization tests (`tests/test_vector_store.py`)
+  - [x] 16.1 Implement vector store characterization tests
     - Test `add_point` with source, content, and non-empty vector calls Qdrant upsert and returns UUID string
     - Test `add_point` with empty vector raises ValueError
     - Test `search` with query vector calls Qdrant query_points and returns payload dicts without score
@@ -321,8 +321,8 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - Test `delete_by_source` calls Qdrant delete with source filter
     - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6_
 
-- [ ] 17. Core LLM and models characterization tests
-  - [~] 17.1 Implement core LLM factory tests in `tests/test_llm.py`
+- [-] 17. Core LLM and models characterization tests
+  - [-] 17.1 Implement core LLM factory tests in `tests/test_llm.py`
     - Test `get_llm` with "ollama:" prefix strips prefix and creates ChatOllama with correct model name
     - Test `get_llm` without prefix creates ChatOllama using model_id directly
     - Test `get_llm` with None or empty model_id falls back to DEFAULT_MODEL
