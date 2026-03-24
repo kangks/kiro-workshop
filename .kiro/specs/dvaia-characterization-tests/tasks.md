@@ -29,7 +29,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
   - Ensure conftest.py fixtures load without errors, ask the user if questions arise.
 
 - [-] 3. Database layer characterization tests (`tests/test_db.py`)
-  - [-] 3.1 Implement `TestInitDb` — schema creation and seed data validation
+  - [x] 3.1 Implement `TestInitDb` — schema creation and seed data validation
     - Test all 5 tables exist after `init_db()`
     - Test seeded user test with username "test" and role "user"
     - Test seeded MFA code for user_id 1
@@ -43,7 +43,7 @@ Build a comprehensive security characterization test suite for the DVAIA applica
     - For any number of consecutive `init_db()` calls, DB contains exactly 1 user, 1 MFA code, 3 backup codes, 3 secret agents
     - **Validates: Requirement 2.7**
 
-  - [~] 3.3 Implement `TestInitDb` RED tests — seed data security assertions
+  - [-] 3.3 Implement `TestInitDb` RED tests — seed data security assertions
     - Test seeded password_hash is bcrypt or argon2, NOT SHA256 hex digest — RED: currently SHA256, will FAIL
     - Test seeded MFA code is cryptographically random, NOT static "123456" — RED: currently static, will FAIL
     - Test seeded backup codes are cryptographically random, NOT static "backup1/backup2/backup3" — RED: currently static, will FAIL
