@@ -67,31 +67,31 @@ DVAIA is a deliberately vulnerable AI application for LLM security workshops. Al
 #### Q3: Server Refactoring Scope
 **Question:** How should the 683-line server.py be restructured?
 **Options:** A) Flask Blueprints (auth, chat, documents, rag, payloads, agent) B) Minimal split (core vs payload routes) C) Keep as-is
-**Your Answer:** `keep as-is`
-**Status:** ⬚ Unanswered
+**Your Answer:** `C) Keep as-is — no refactoring needed for workshop`
+**Status:** ✅ Answered
 
 ---
 
 #### Q4: Testing Strategy
 **Question:** What testing approach for property-based tests?
 **Options:** A) Hypothesis tests for all core modules B) Focus PBT on security-critical paths C) PBT only for new hardened code
-**Your Answer:** `ALWAYS have the red test, to keep this workshop relevant to LLM security`
-**Status:** ⬚ Unanswered
+**Your Answer:** `B) Security-critical paths — RED tests that prove vulnerabilities exist`
+**Status:** ✅ Answered
 
 ---
 
 #### Q5: Connection Management
 **Question:** How should database connections be managed?
 **Options:** A) Connection pooling B) Context managers with proper lifecycle C) Keep current pattern
-**Your Answer:** `Keep current pattern`
-**Status:** ⬚ Unanswered
+**Your Answer:** `C) Keep current pattern`
+**Status:** ✅ Answered
 
 ---
 
 ### Questionnaire Status
 | Total | Answered | Ready to Proceed? |
 |-------|----------|-------------------|
-| 5 | 0 | ❌ No |
+| 5 | 5 | ✅ Yes |
 
 ### Project-Level Requirements
 | ID | Requirement | Priority | Status |
