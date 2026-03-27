@@ -151,11 +151,11 @@ api/server.py (Flask routes — 25+ endpoints)
 ### Execution Plan
 | Stage | Name | Goal | Status |
 |-------|------|------|--------|
-| 1 | Security Feature Flags | Configurable toggle for each vulnerability class | ⬚ |
-| 2 | Server Refactoring | Split server.py into Flask Blueprints | ⬚ |
-| 3 | Connection Management | Thread-safe DB connections | ⬚ |
-| 4 | Property-Based Tests | Hypothesis tests for security-critical paths | ⬚ |
-| 5 | Code Deduplication | Extract shared utilities | ⬚ |
+| 1 | RED Characterization Tests | Tests proving each vulnerability exists (auth, SSRF, CSRF, RAG poisoning, agent tools) | ⬚ |
+| 2 | Property-Based Tests | Hypothesis PBT for auth, input validation, RAG chunking, agent access | ⬚ |
+| 3 | Feature Flags | Per-vulnerability env toggles for workshop demos | ⬚ |
+| 4 | Code Deduplication | Extract shared utilities (e.g. `_messages_to_lc`) | ⬚ |
+| 5 | Documentation | Workshop guide, vulnerability catalog, test explanations | ⬚ |
 
 ### Component Map
 | Component | Location | Description |
