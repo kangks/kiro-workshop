@@ -1,8 +1,8 @@
 # Living Spec: DVAIA — Damn Vulnerable AI Application
 
-> **Last Updated**: 2026-03-27T12:00:00Z
+> **Last Updated**: 2026-03-27T12:30:00Z
 > **Phase**: 🔵 Planning
-> **Current Stage**: Intent & Requirements Questionnaire
+> **Current Stage**: Architecture Review
 > **Project Type**: Brownfield
 > **Owner**: @developer
 > **Drift Score**: 0%
