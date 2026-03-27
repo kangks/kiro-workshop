@@ -206,6 +206,7 @@ api/server.py (Flask routes — 25+ endpoints)
 |-----------|----------|-------|---------|---------|
 | 2026-03-27T12:00:00Z | Created Living Spec (Option B) | 🔵 | Brownfield modernization | Analysis complete |
 | 2026-03-27T12:00:00Z | 3 parallel analysis agents | 🔵 | Reverse engineering | 5 critical, 5 high, 7 tech debt items |
+| 2026-03-27T12:30:00Z | Questionnaire complete — workshop focus | 🔵 | Vulnerabilities preserved, no refactoring, RED tests + PBT | Execution plan revised |
 
 ---
 
