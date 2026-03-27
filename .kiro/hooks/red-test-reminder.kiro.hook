@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "RED Test Verification Reminder",
+  "description": "After any file is edited in the DVAIA codebase, reminds the agent to verify RED vulnerability characterization tests still pass to ensure no vulnerability was accidentally patched.",
+  "version": "1",
+  "when": {
+    "type": "postToolUse",
+    "toolTypes": [
+      "write"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "POST-WRITE CHECK: You just modified a file in the DVAIA workshop codebase. If you changed any file in app/, api/, or core/, you MUST run the RED test suite (tests marked with test_red_ prefix or @pytest.mark.red) to verify all intentional vulnerabilities are still intact. If any RED test fails, your change accidentally patched a vulnerability — revert it immediately."
+  }
+}
