@@ -27,18 +27,18 @@
 | Security Posture | Deliberately vulnerable (OWASP LLM Top 10) — 5 critical, 5 high findings | auto |
 
 ### Problem Statement
-DVAIA is a deliberately vulnerable AI application for security education. The goal is to harden the codebase with configurable security controls, improve code quality, and add property-based testing — while preserving the educational vulnerability surface behind feature flags.
+DVAIA is a deliberately vulnerable AI application for LLM security workshops. All vulnerabilities must be preserved as-is — they are the teaching material. The goal is to add characterization tests (RED tests) that prove each vulnerability exists, add property-based tests for security-critical paths, and keep the codebase clean and well-documented for workshop participants.
 
 ### Success Criteria
 | Criteria | Target | Current | Status |
 |----------|--------|---------|--------|
-| 🎯 Security controls toggleable | All OWASP findings gated by flags | Hardcoded vulnerable | ⬚ |
-| 📈 Property-based tests | PBT for core security modules | pytest only, no hypothesis | ⬚ |
-| 📈 Code quality | server.py split into blueprints | 683-line monolith | ⬚ |
+| 🎯 RED tests for all vulnerabilities | Every OWASP finding has a failing-by-design test | Partial coverage | ⬚ |
+| 📈 Property-based tests | PBT for security-critical paths (auth, RAG, agent) | No hypothesis tests | ⬚ |
+| 📈 Workshop readiness | All vulns documented, reproducible, testable | Good README, partial tests | ⬚ |
 
 ### Scope
-**In Scope:** Security hardening (feature-flagged), code quality, PBT, server refactoring
-**Out of Scope:** New features, UI redesign, migration away from Flask
+**In Scope:** RED characterization tests, property-based testing, test infrastructure, documentation
+**Out of Scope:** Security fixes, server refactoring, connection pooling, UI changes
 
 ---
 
