@@ -96,11 +96,11 @@ DVAIA is a deliberately vulnerable AI application for LLM security workshops. Al
 ### Project-Level Requirements
 | ID | Requirement | Priority | Status |
 |----|-------------|----------|--------|
-| PR-001 | Security vulnerabilities gated behind configurable feature flags | HIGH | ⬚ |
-| PR-002 | Property-based tests for security-critical code paths | HIGH | ⬚ |
-| PR-003 | server.py refactored into Flask Blueprints | MEDIUM | ⬚ |
-| PR-004 | Duplicated code extracted to shared utilities | LOW | ⬚ |
-| PR-005 | Connection management improved (thread-safe) | MEDIUM | ⬚ |
+| PR-001 | RED characterization tests for all OWASP LLM Top 10 vulnerabilities | HIGH | ⬚ |
+| PR-002 | Property-based tests (hypothesis) for security-critical paths | HIGH | ⬚ |
+| PR-003 | All vulnerabilities preserved as-is (workshop material) | HIGH | ⬚ |
+| PR-004 | Feature flags per vulnerability for workshop toggle demos | MEDIUM | ⬚ |
+| PR-005 | Duplicated code extracted to shared utilities | LOW | ⬚ |
 
 ### Related Kiro Specs
 | Spec | Path | Phase | Description |
