@@ -59,8 +59,8 @@ DVAIA is a deliberately vulnerable AI application for LLM security workshops. Al
 #### Q2: Priority Vulnerabilities
 **Question:** Which vulnerability categories should be hardened first?
 **Options:** A) Authentication (SHA-256 → bcrypt, session security) B) Input validation (SSRF, CSRF, upload limits) C) Agent tools (auth checks, human-in-the-loop) D) All simultaneously
-**Your Answer:** `DO NOT fix any security vulnerabilities. Instead, for every iterations, ALWAYS keep the security vulernability to make sure this LLM security workshop is relevant.`
-**Status:** ⬚ Unanswered
+**Your Answer:** `A) Authentication first — most visible before/after for workshop demos`
+**Status:** ✅ Answered
 
 ---
 
