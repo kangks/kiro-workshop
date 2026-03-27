@@ -8,9 +8,9 @@
 > **Drift Score**: 0%
 
 ## Current Status
-- **Next Action**: Complete the Requirements Questionnaire below
+- **Next Action**: Review and approve Architecture (§3)
 - **Blockers**: None
-- **Last Completed**: Brownfield reverse engineering (parallel analysis)
+- **Last Completed**: Requirements Questionnaire (all 5 answered)
 
 ---
 
