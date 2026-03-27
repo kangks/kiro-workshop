@@ -51,8 +51,8 @@ DVAIA is a deliberately vulnerable AI application for LLM security workshops. Al
 #### Q1: Security Hardening Approach
 **Question:** How should security fixes coexist with the deliberately vulnerable code?
 **Options:** A) Feature flags per vulnerability B) Global "hardened mode" toggle C) Separate hardened branch
-**Your Answer:** `No fix of security required. This is a workshop material for LLM secutity, so we need to keep the vulernabilities as they are, and only be fixed during the workshop.`
-**Status:** ⬚ Unanswered
+**Your Answer:** `A) Feature flags per vulnerability — each vuln gets its own env toggle for workshop demos`
+**Status:** ✅ Answered
 
 ---
 
