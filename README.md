@@ -1,0 +1,2 @@
+* Source of "micro-blogging": https://static.us-east-1.prod.workshops.aws/public/aeb5afb7-434b-4f03-82db-88665f980c7f/assets/kiro-workshop-assets.zip
+* Source of DVAIA: https://github.com/kangks/DVAIA-Damn-Vulnerable-AI-Application.git
