@@ -1,25 +1,28 @@
 {
     "typescript.autoClosingTags": false,
     "terminal.integrated.env.osx": {
-        "CLAUDE_CODE_USE_BEDROCK": "1"
+        "CLAUDE_CODE_USE_BEDROCK": "1",
+        "AWS_REGION": "us-east-1",
+        "AWS_PROFILE": "default",        
     },
+    "terminal.integrated.inheritEnv": false,
     "kiroAgent.agentModelSelection": "auto",
     "claudeCode.environmentVariables": [
         {
-        "name": "CLAUDE_CODE_USE_BEDROCK",
-        "value": "1"
+            "name": "CLAUDE_CODE_USE_BEDROCK",
+            "value": "1"
         },
         {
-        "name": "AWS_REGION",
-        "value": "us-east-1"
+            "name": "AWS_REGION",
+            "value": "us-east-1"
         },
         {
-        "name": "ANTHROPIC_MODEL",
-        "value": "arn:aws:bedrock:us-east-1:654654616949:application-inference-profile/hxa3ipa4jlhw"
+            "name": "ANTHROPIC_MODEL",
+            "value": "arn:aws:bedrock:us-east-1:654654616949:application-inference-profile/hxa3ipa4jlhw"
         },
         {
-        "name": "AWS_PROFILE",
-        "value": "default"
+            "name": "AWS_PROFILE",
+            "value": "default"
         }
     ],
     "claudeCode.useTerminal": true
