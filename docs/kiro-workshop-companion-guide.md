@@ -1,17 +1,15 @@
 # Kiro Immersion Workshop — Companion Guide
 
-> A non-technical-friendly supplement for the [Kiro Immersion Workshop](https://catalog.workshops.aws/kiro-immersion/en-US/20-steering/21-generate-steering).
-> Designed for product managers, designers, and anyone new to AI-assisted development tools.
+> A hands-on supplement for the [Kiro Immersion Workshop](https://catalog.workshops.aws/kiro-immersion/en-US/00-introduction).
+> Covers installation, authentication, and a guided walkthrough of Spec-Driven Development (SDD) using the `micro-blogging` sample app.
 
 ---
 
 ## What is Kiro?
 
-Kiro is an AI-powered development environment (IDE) built by AWS. Think of it as a smart code editor that understands your project and can help write, review, and maintain code through conversation.
+Kiro is an AI-powered development environment (IDE) built by AWS. It's a smart code editor that understands your project and helps write, review, and maintain code through conversation.
 
 You don't need to be a developer to benefit from Kiro. Product managers can use it to turn requirements into structured specs, review generated code, and understand how features are being built.
-
-Key concepts in plain language:
 
 | Kiro Term | What It Means |
 |-----------|---------------|
@@ -24,7 +22,7 @@ Key concepts in plain language:
 
 ---
 
-## Part 1: Installing Kiro (Step-by-Step)
+## Part 1: Installing Kiro
 
 ### System Requirements
 
@@ -36,54 +34,46 @@ Key concepts in plain language:
 
 ### Download and Install
 
-1. Open your browser and go to [https://kiro.dev/downloads](https://kiro.dev/downloads)
-2. Click the download button for your operating system (macOS, Windows, or Linux)
+1. Go to [https://kiro.dev/downloads](https://kiro.dev/downloads)
+2. Click the download button for your operating system
 3. Open the downloaded file:
-   - **macOS**: Open the `.dmg` file, drag Kiro to your Applications folder
-   - **Windows**: Run the `.exe` installer and follow the prompts
-   - **Linux**: Follow the instructions for your distribution
-4. Launch Kiro from your Applications folder (macOS), Start Menu (Windows), or application launcher (Linux)
+   - macOS: Open the `.dmg` file, drag Kiro to your Applications folder
+   - Windows: Run the `.exe` installer and follow the prompts
+   - Linux: Follow the instructions for your distribution
+4. Launch Kiro
 
-> **CLI alternative (macOS/Linux):** If you prefer the terminal, you can also install the Kiro CLI:
-> ```
+> CLI alternative (macOS/Linux):
+> ```bash
 > curl -fsSL https://cli.kiro.dev/install | bash
 > ```
 
 ### First Launch
 
-When you open Kiro for the first time:
-
-1. You'll be asked to sign in (see authentication section below)
-2. Optionally import settings from VS Code if you already use it
+1. Sign in (see authentication section below)
+2. Optionally import settings from VS Code
 3. Pick a theme (light or dark)
 4. Allow shell integration so Kiro can run commands for you
-5. You'll land on the Welcome page — open a project folder to get started
+5. Open a project folder to get started
 
 ---
 
 ## Part 2: Setting Up Authentication
 
-Kiro supports multiple sign-in methods. Choose the one that applies to you.
+### Option A: Social Login (Quickest)
 
-### Option A: Social Login (Quickest for Individuals)
-
-Best for: Personal use, trying Kiro for the first time.
-
-**GitHub:**
+GitHub:
 1. Click "Sign in with GitHub"
-2. Enter your GitHub username/email and password
+2. Enter your credentials
 3. Click "Authorize kirodotdev"
 
-**Google:**
+Google:
 1. Click "Sign in with Google"
 2. Choose your Google account
 3. Click "Continue"
 
-> You get 500 bonus credits (usable within 30 days) when you first sign up with social login or Builder ID.
+> You get 500 bonus credits (usable within 30 days) when you first sign up.
 
-### Option B: AWS Builder ID (For AWS Users)
-
-Best for: Individual developers who already use AWS.
+### Option B: AWS Builder ID
 
 1. Click "Login with AWS Builder ID"
 2. Enter your email and click Next
@@ -92,26 +82,21 @@ Best for: Individual developers who already use AWS.
 
 ### Option C: AWS IAM Identity Center (IIC) — For Organizations
 
-Best for: Teams and enterprises using AWS Organizations.
+What you need from your admin:
+- Your organization's Start URL (looks like `https://d-xxxxxxxxxx.awsapps.com/start`)
+- The AWS Region where your identity directory is hosted
 
-This is the method your workshop facilitator may ask you to use if your organization manages access centrally.
+Steps:
+1. Click "Sign in with AWS IAM Identity Center"
+2. Enter the Start URL
+3. Enter the Region (e.g., `us-east-1`)
+4. Click Continue
+5. Complete the sign-in flow in your browser
+6. Return to Kiro
 
-**What you need from your admin:**
-- Your organization's **Start URL** (looks like `https://d-xxxxxxxxxx.awsapps.com/start`)
-- The **AWS Region** where your identity directory is hosted
-
-**Steps:**
-1. In Kiro, click "Sign in with AWS IAM Identity Center"
-2. Enter the **Start URL** provided by your admin
-3. Enter the **Region** (e.g., `us-east-1`)
-4. Click **Continue**
-5. Your browser will open — complete the sign-in flow with your organization's credentials
-6. Return to Kiro — you should now be authenticated
-
-**Troubleshooting IIC:**
-- Make sure you have the correct Start URL — ask your admin if unsure
+Troubleshooting:
+- Make sure you have the correct Start URL
 - Ensure your browser allows pop-ups from Kiro
-- If you see an error, check that your admin has granted you access to Kiro in the IAM Identity Center console
 - For GovCloud users: your Start URL will contain `us-gov-home`
 
 ### Option D: External Identity Provider (Okta, Entra ID, etc.)
@@ -123,114 +108,228 @@ This is the method your workshop facilitator may ask you to use if your organiza
 
 ---
 
-## Part 3: Workshop Module — Generate Steering
+## Part 3: The Micro-Blogging Sample App
 
-This section complements the workshop module at:
-`https://catalog.workshops.aws/kiro-immersion/en-US/20-steering/21-generate-steering`
+The `micro-blogging` project is a Twitter/X-style social media platform. It's a 3-tier serverless application you'll use to learn Spec-Driven Development with Kiro.
 
-### What is Steering? (Non-Technical Explanation)
+### Architecture at a Glance
 
-Imagine you hire a new team member. On their first day, you'd give them:
-- A product overview ("here's what we build and why")
-- A tech stack document ("we use Python, React, and PostgreSQL")
-- A project structure guide ("here's how our folders are organized")
-
-**Steering files are exactly that — but for the AI.** They live in a `.kiro/steering/` folder in your project and are written in plain Markdown (like a simple text document with formatting).
-
-### Why Steering Matters for Product Managers
-
-- **Consistency**: Every piece of code Kiro generates follows your team's standards
-- **Less back-and-forth**: You don't have to re-explain conventions in every conversation
-- **Team alignment**: New team members (human or AI) get the same context
-- **Quality control**: Steering acts as guardrails for AI-generated output
-
-### Generating Foundation Steering Files
-
-Kiro can auto-generate three foundational steering files by analyzing your project:
-
-1. Open your project in Kiro
-2. Look for the **Steering** section in the Kiro side panel (left sidebar)
-3. Click **"Generate Steering Docs"** (or click the `+` button and select "Foundation steering files")
-4. Kiro will create three files:
-
-| File | Purpose | Non-Technical Analogy |
-|------|---------|----------------------|
-| `product.md` | Defines your product's purpose, users, and goals | Your product brief or PRD |
-| `tech.md` | Documents frameworks, libraries, and tools | Your tech stack decision record |
-| `structure.md` | Outlines file organization and naming conventions | Your project's filing system |
-
-### Creating Custom Steering Files
-
-You can add your own steering files for specific needs:
-
-1. In the Steering section, click the `+` button
-2. Choose workspace or global scope
-3. Give it a descriptive name (e.g., `api-standards.md`, `security-policies.md`)
-4. Write your guidance in plain Markdown
-5. Optionally click **Refine** to have Kiro improve your instructions
-
-**Example steering file for a product team:**
-
-```markdown
-# Product Requirements Standards
-
-When generating features or specs:
-- Always include user stories in the format: "As a [role], I want [feature], so that [benefit]"
-- Include acceptance criteria for every requirement
-- Flag any requirement that might impact data privacy or security
-- Use simple, non-technical language in user-facing text
-- Follow our brand voice guidelines: friendly, clear, professional
 ```
+Browser → CloudFront → S3 (React SPA)
+                ↓
+         API Gateway (REST)
+                ↓
+         Lambda Functions (Node.js 22.x)
+                ↓
+         ┌──────────┬──────────┐
+         │ Cognito   │ DynamoDB │
+         │ (auth)    │ (data)   │
+         └──────────┴──────────┘
+```
+
+### Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 18 + TypeScript + Vite 4 |
+| Backend | Node.js Lambda functions (plain JS) |
+| Infrastructure | AWS CDK v2 (TypeScript) |
+| Auth | Cognito User Pool + JWT |
+| Database | DynamoDB (5 tables) |
+| Hosting | S3 + CloudFront |
+
+### Core Features (already implemented)
+
+- User registration and authentication
+- Create, read, and like posts (280 char limit)
+- Follow/unfollow users
+- Feed with sorting (newest, popular) and pagination
+- User profiles with bio and avatar
+
+### Open the Project
+
+```bash
+# From the workshop repo root
+# Open the micro-blogging folder in Kiro
+```
+
+---
+
+## Part 4: Spec-Driven Development (SDD) with Kiro
+
+SDD is Kiro's structured approach to building features. Instead of jumping straight into code, you define what you want through a three-phase process: Requirements → Design → Tasks.
+
+### Why SDD Matters
+
+- Creates a traceable path from requirement to code
+- You review requirements before any code is written
+- Reduces ambiguity through EARS notation (structured requirement syntax)
+- Kiro generates implementation tasks from the design, so nothing is missed
+
+### Step 1: Generate Steering Files
+
+Steering files give Kiro persistent context about your project. The micro-blogging app already has steering files in `.kiro/steering/`:
+
+| File | Purpose |
+|------|---------|
+| `product.md` | Product overview, core features, design language reference |
+| `tech.md` | Tech stack, build system, common commands |
+| `structure.md` | File organization, naming conventions, key patterns |
+
+To generate your own (for a fresh project):
+1. Open the Kiro side panel → Steering section
+2. Click "Generate Steering Docs" (or `+` → "Foundation steering files")
+3. Kiro analyzes your codebase and creates `product.md`, `tech.md`, `structure.md`
+
+To add custom steering:
+1. Click `+` in the Steering section
+2. Give it a name (e.g., `api-standards.md`)
+3. Write your guidance in Markdown
+4. Optionally click "Refine" to have Kiro improve it
 
 ### Steering Inclusion Modes
 
 | Mode | When It Loads | Best For |
 |------|---------------|----------|
-| `always` (default) | Every interaction | Core standards, tech stack, product overview |
-| `fileMatch` | Only when working with matching files | Domain-specific rules (e.g., API standards only when editing API files) |
-| `manual` | Only when you type `#filename` in chat | Specialized guides you need occasionally |
-| `auto` | When your request matches the description | Context-heavy guidance that should load only when relevant |
+| `always` (default) | Every interaction | Core standards, tech stack |
+| `fileMatch` | Only when working with matching files | Domain-specific rules |
+| `manual` | Only when you type `#filename` in chat | Specialized guides |
+| `auto` | When your request matches the description | Context-heavy guidance |
+
+### Step 2: Create a Spec
+
+A spec turns a natural language prompt into a structured development plan.
+
+1. Open the Kiro panel → click `+` under Specs
+2. Describe your feature in plain language, for example:
+
+   > "Add a comments feature to the micro-blogging app. Users should be able to comment on posts, see comments on a post, and delete their own comments."
+
+3. Kiro generates three documents:
+
+| Document | What It Contains |
+|----------|-----------------|
+| `requirements.md` | Formal requirements using EARS notation — unambiguous, testable statements |
+| `design.md` | Architecture analysis, component design, data models, API contracts |
+| `tasks.md` | Ordered implementation plan with discrete, executable tasks |
+
+4. Review each document. You can ask Kiro to refine requirements, adjust the design, or reorder tasks.
+
+### Step 3: Execute Tasks
+
+Once you're satisfied with the spec:
+
+1. Click "Start Task" on the first task in `tasks.md`
+2. Kiro works through the task in Autopilot mode (or Supervised mode if you prefer to review each change)
+3. After each task completes, review the changes
+4. Move to the next task
+
+### The Living Spec (Optional Advanced Pattern)
+
+The micro-blogging app includes a Living Spec at `.kiro/specs/00-micro-blogging-app.living.md`. This is a single evolving document that serves as the source of truth for the entire project, powered by the [Living Spec Power](https://github.com/tomasmihalyi/living-spec-power).
+
+The Living Spec includes:
+- Intent and problem statement
+- Requirements questionnaire (answer before building)
+- Architecture decisions
+- Component map
+- Technical debt register
+- Decision log
+
+It orchestrates individual Kiro specs for specific features. Think of it as a living PRD that stays in sync with the code.
 
 ---
 
-## Part 4: Other Key Workshop Concepts
+## Part 5: Hands-On Exercise — Adding a Feature with SDD
 
-### Specs (Spec-Driven Development)
+### Exercise: Add Comments to the Micro-Blogging App
 
-Specs turn a natural language prompt into a structured development plan:
+The DynamoDB Comments table already exists in the infrastructure but has no Lambda functions or UI.
 
-1. **Requirements** — Kiro converts your idea into formal requirements using EARS notation (a structured way to write unambiguous requirements)
-2. **Design** — Kiro analyzes your codebase and proposes architecture
-3. **Tasks** — Kiro creates an ordered implementation plan with discrete tasks
+#### 1. Review the Current State
 
-**Why PMs should care:** Specs create a traceable path from requirement to code. You can review requirements before any code is written — just like reviewing a PRD before development starts.
+Open the Living Spec (`.kiro/specs/00-micro-blogging-app.living.md`) and note:
+- The Comments table exists but has no implementation (see Component Map)
+- Q3 in the Requirements Questionnaire asks about implementing comments
+- TD-012 notes zero test coverage
 
-To create a spec: Open the Kiro panel → click `+` under Specs → describe your feature in plain language.
+#### 2. Create a Spec for Comments
 
-### Hooks (Automated Workflows)
+Open the Kiro panel → Specs → click `+`
 
-Hooks automate repetitive tasks. Examples:
-- Auto-run linting when a file is saved
-- Generate documentation after a spec task completes
-- Run security checks before code is committed
+Prompt:
+> "Implement a comments feature for the micro-blogging app. Users should be able to add comments to posts, view all comments on a post, and delete their own comments. Follow the existing patterns: Lambda function per route, DynamoDB for storage, React components for UI. The Comments DynamoDB table already exists with a GSI."
 
-**Why PMs should care:** Hooks enforce quality standards automatically — no one forgets to run tests or update docs.
+#### 3. Review the Generated Spec
 
-To create a hook: Open the Kiro panel → Agent Hooks section → click `+` → describe what you want in natural language.
+Check `requirements.md`:
+- Are the requirements clear and testable?
+- Do they cover edge cases (empty comments, character limits, unauthorized delete)?
 
-### Chat (Agentic Conversation)
+Check `design.md`:
+- Does the API design follow existing patterns (`/api/posts/{postId}/comments`)?
+- Are the Lambda handlers consistent with existing ones?
+- Does the frontend design match the existing component structure?
 
-Kiro's chat lets you describe what you want in natural language. You can:
-- Ask questions about the codebase
-- Request code changes
-- Drop in images (UI mockups, architecture diagrams) for context
-- Attach documents (PDFs, specs) for reference
+Check `tasks.md`:
+- Are tasks ordered correctly (backend before frontend)?
+- Are there tasks for error handling and edge cases?
 
-**Autopilot mode** lets Kiro work through complex tasks autonomously, while **Supervised mode** lets you review each change before it's applied.
+#### 4. Execute the Tasks
+
+Click "Start Task" on the first task and let Kiro implement it. Review each change before moving to the next task.
+
+#### 5. Verify
+
+After all tasks complete:
+- Check that the backend Lambda handlers follow the `withAuth` middleware pattern
+- Check that the frontend components match the design language (purple accent, rounded buttons)
+- Test the feature locally with `yarn start:frontend`
 
 ---
 
-## Part 5: Pricing Quick Reference
+## Part 6: Hooks — Automating Quality Checks
+
+Hooks automate repetitive tasks. Here are practical examples for the micro-blogging app:
+
+### Example: Lint on Save
+
+```json
+{
+  "name": "Lint on Save",
+  "version": "1.0.0",
+  "when": {
+    "type": "fileEdited",
+    "patterns": ["*.ts", "*.tsx"]
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "yarn workspace frontend lint"
+  }
+}
+```
+
+### Example: Remind About Tests After Task Completion
+
+```json
+{
+  "name": "Test Reminder",
+  "version": "1.0.0",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "The task is complete. Check if there are corresponding tests for the changes made. If not, suggest what tests should be written."
+  }
+}
+```
+
+To create a hook: Kiro panel → Agent Hooks → click `+` → describe what you want.
+
+---
+
+## Part 7: Pricing Quick Reference
 
 | Plan | Price | Credits/Month | Overage |
 |------|-------|---------------|---------|
@@ -239,161 +338,78 @@ Kiro's chat lets you describe what you want in natural language. You can:
 | Pro+ | $40/mo | 2,000 | $0.04/credit |
 | Power | $200/mo | 10,000 | $0.04/credit |
 
-New sign-ups with social login or Builder ID get **500 bonus credits** usable within 30 days.
-
-Enterprise plans are available with centralized billing, SAML/SCIM SSO via IAM Identity Center, and usage analytics. See [kiro.dev/enterprise](https://kiro.dev/enterprise/) for details.
+New sign-ups get 500 bonus credits usable within 30 days.
 
 ---
 
-## Part 6: Glossary for Non-Technical Attendees
+## Part 8: Glossary
 
 | Term | Definition |
 |------|-----------|
-| IDE | Integrated Development Environment — a software application for writing code (like Microsoft Word, but for code) |
+| IDE | Integrated Development Environment — a software application for writing code |
 | Markdown | A simple text formatting language using symbols like `#` for headings and `*` for bullets |
-| Repository (Repo) | A folder that contains all the files for a project, usually tracked with version control |
+| Repository (Repo) | A folder that contains all the files for a project, tracked with version control |
 | Git | A version control system that tracks changes to files over time |
-| CLI | Command Line Interface — a text-based way to interact with your computer (the "terminal") |
-| MCP | Model Context Protocol — a standard for connecting AI tools to external data sources and services |
-| EARS Notation | Easy Approach to Requirements Syntax — a structured way to write requirements that reduces ambiguity |
+| CLI | Command Line Interface — a text-based way to interact with your computer |
+| MCP | Model Context Protocol — a standard for connecting AI tools to external data sources |
+| EARS Notation | Easy Approach to Requirements Syntax — a structured way to write unambiguous requirements |
+| SDD | Spec-Driven Development — Kiro's workflow of Requirements → Design → Tasks before coding |
+| TDD | Test-Driven Development — write tests first, then code to make them pass |
+| Red-Green-Refactor | The TDD cycle: Red (failing test) → Green (make it pass) → Refactor (clean up) |
 | SSO | Single Sign-On — log in once and access multiple services |
-| IAM | Identity and Access Management — AWS's system for controlling who can access what |
-| IIC / IAM Identity Center | AWS's centralized identity service for managing user access across AWS accounts and applications |
-| AIDLC | AI-Driven Development Life Cycle — the workflow of using AI agents throughout the software development process |
+| IAM | Identity and Access Management — AWS's system for controlling access |
+| Living Spec | A single evolving document that serves as the source of truth for a project |
 
 ---
 
-## Part 7: Tips for Non-Technical Workshop Attendees
+## Part 9: Tips for Workshop Attendees
 
-1. **You don't need to write code.** Kiro can generate code from your descriptions. Focus on clearly describing *what* you want, not *how* to build it.
+1. You don't need to write code from scratch. Kiro generates code from your descriptions. Focus on clearly describing what you want.
 
-2. **Use specs as your superpower.** As a PM, you already think in requirements and acceptance criteria. Kiro's spec workflow is designed for exactly that kind of thinking.
+2. Use specs as your superpower. Think in requirements and acceptance criteria. Kiro's spec workflow is designed for exactly that.
 
-3. **Steering files are your voice.** Write steering files in plain language describing your product standards, brand guidelines, or quality expectations. Kiro will follow them.
+3. Steering files are your voice. Write them in plain language describing your standards. Kiro will follow them.
 
-4. **Ask questions in chat.** You can ask Kiro things like "explain what this file does" or "what would break if we changed this feature?" — it's a great way to understand a codebase without reading code.
+4. Ask questions in chat. "Explain what this file does" or "What would break if we changed this?" are great ways to understand a codebase.
 
-5. **Don't worry about breaking things.** Kiro works in your local environment. You can always undo changes. In Supervised mode, you approve every change before it's applied.
+5. Don't worry about breaking things. Kiro works locally. You can always undo. In Supervised mode, you approve every change.
 
-6. **Images work.** Drag a screenshot, wireframe, or whiteboard photo into the chat. Kiro can use visual context to guide its work.
+6. Images work. Drag a screenshot, wireframe, or whiteboard photo into chat for context.
+
+7. Review before you approve. SDD gives you checkpoints at requirements, design, and tasks. Use them.
 
 ---
 
-## Appendix A: Kiro Powers — Extending Kiro's Capabilities
+## Appendix A: Kiro Powers
 
-Powers are pre-packaged plugins that give Kiro specialized knowledge and tools for specific domains. They bundle documentation (steering), automation (hooks), and external tool connections (MCP servers) into a single installable package.
+Powers are pre-packaged plugins that give Kiro specialized knowledge. Install them from the Powers icon in the sidebar.
 
-### How to Install a Power
+### By Category
 
-1. Open Kiro IDE (version 0.7 or later)
-2. Click the **Powers** icon in the sidebar
-3. Browse available powers or click **"Add Custom Power" → "From GitHub"**
-4. Paste the GitHub repository URL of the power
-5. The power activates automatically based on your conversation context
-
-### Living Spec Power
-
-**Repository:** [github.com/tomasmihalyi/living-spec-power](https://github.com/tomasmihalyi/living-spec-power)
-
-**Problem it solves:** In typical AI-assisted development, project context gets fragmented across dozens of files per feature — requirements in one place, architecture in another, progress tracking somewhere else. This makes it hard for both humans and AI to maintain a coherent picture of the project.
-
-**What it does:** Consolidates all project documentation into a single, AI-maintainable specification file with seven sections aligned to the AI Development Life Cycle phases (Planning → Building → Operating). Instead of managing 10–20 files per feature, you get one evolving "living spec" that serves as the single source of truth.
-
-**Key features (v2.0):**
-
-| Feature | What It Means for You |
-|---------|----------------------|
-| Multi-Agent Analysis | Multiple specialized AI agents analyze your codebase in parallel for faster, more thorough understanding |
-| Comprehension Gates | Checkpoints that verify the developer actually understands the spec before moving to the next phase — prevents "just let the AI do it" without understanding |
-| Tiered Approvals | Low-risk changes (timestamps, status) auto-update; high-risk changes (requirements, architecture) require explicit approval |
-| Domain Specialists | Automatically activates specialized guidance based on what you're working on (database, API, frontend, security, testing) |
-| Drift Detection | Monitors how far your code has drifted from the spec and alerts you when they're out of sync |
-| Spec Critic | Automated quality scoring that checks completeness, consistency, and quality of your spec |
-
-**Three approaches:**
-
-| Approach | Best For |
-|----------|----------|
-| Living Spec Only | MVPs, small teams — creates a single spec file |
-| Living Spec + Kiro Specs | Multiple features, growing projects — orchestrates across feature specs |
-| Kiro Specs Only | Teams that prefer formal EARS methodology with individual specs |
-
-**Why PMs should care:** The Living Spec Power essentially creates a living PRD that stays in sync with the actual code. It prevents the common problem where documentation becomes stale the moment development starts.
-
-### Other Notable Powers
-
-Below is a selection of powers available in the [Kiro Powers catalog](https://kiro.dev/powers/) organized by what problem they solve:
-
-#### Design & Prototyping
-
-| Power | Problem It Solves |
-|-------|-------------------|
-| **Design to Code with Figma** | Bridges the gap between design and development — turns Figma designs into production-ready code and connects Figma components to code via Code Connect |
-| **Miro Board Context for Codegen** | Uses Miro boards (architecture diagrams, UI flows, project logic) as the source of truth for code generation |
-
-#### Deployment & Infrastructure
-
-| Power | Problem It Solves |
-|-------|-------------------|
-| **Deploy web apps with Netlify** | Simplifies deploying React, Next.js, Vue apps to Netlify's global CDN with automatic builds |
-| **Build full-stack apps with AWS Amplify** | Guides building full-stack apps with AWS Amplify Gen 2 — authentication, data models, storage, serverless functions |
-| **Deploy Web Apps with ECS Express Mode** | Takes your container image and gives you back an HTTPS endpoint — simplest path to deploying on AWS |
-| **Build AWS infrastructure with CDK** | Helps build well-architected AWS infrastructure following best practices |
-| **Deploy infrastructure with Terraform** | Manages Infrastructure as Code with Terraform — registry providers, modules, policies |
-| **AWS SAM** | Aids development with AWS Serverless Application Model for serverless applications |
-
-#### Backend & Database
-
-| Power | Problem It Solves |
-|-------|-------------------|
-| **Build a backend with Supabase** | Provides guided setup for Supabase's Postgres database, auth, storage, and real-time features |
-| **Build applications with Aurora PostgreSQL** | Leverages Aurora PostgreSQL-specific best practices for database-backed applications |
-| **Build a database with Neon** | Serverless Postgres with database branching and scale-to-zero for modern development |
-
-#### AI & Agents
-
-| Power | Problem It Solves |
-|-------|-------------------|
-| **Build an agent with Strands** | Guides building AI agents with the Strands Agent SDK using various LLM providers |
-| **Build an agent with Amazon Bedrock AgentCore** | Helps build, deploy, and operate AI agents on AWS's agentic platform |
-
-#### Security & Quality
-
-| Power | Problem It Solves |
-|-------|-------------------|
-| **Snyk Secure at Inception** | Scans AI-generated code for security vulnerabilities and provides remediation guidance |
-| **Checkmarx** | AI-powered security scanning for SAST, secrets, IaC, containers, and open source dependencies |
-| **IAM Policy Autopilot** | Analyzes application code to auto-generate least-privilege IAM policies — reduces access troubleshooting time |
-
-#### Observability & Monitoring
-
-| Power | Problem It Solves |
-|-------|-------------------|
-| **AWS Observability** | Combines CloudWatch Logs, Metrics, Alarms, Application Signals, and CloudTrail for complete monitoring and troubleshooting |
-| **Datadog Observability** | Queries logs, metrics, traces, and incidents from Datadog for production debugging |
-| **Dynatrace Observability** | Queries logs, metrics, traces, and problems from Dynatrace for performance analysis |
-
-#### Payments & Commerce
-
-| Power | Problem It Solves |
-|-------|-------------------|
-| **Stripe Payments** | Guides building payment integrations — accepting payments, managing subscriptions, handling billing |
-| **Checkout.com Global Payments** | Provides access to Checkout.com's API documentation for payments, customers, and disputes |
-
-#### Migration & Modernization
-
-| Power | Problem It Solves |
-|-------|-------------------|
-| **Plan and Migrate to Graviton** | Analyzes source code for compatibility with AWS Graviton (Arm64) processors and suggests required changes |
-| **GCP to AWS Migration Advisor** | Assesses Google Cloud usage and recommends AWS equivalents with pricing comparison |
-| **Crush tech debt with AWS Transform** | Performs code upgrades, framework migrations, and API/SDK migrations |
-
-#### Testing
-
-| Power | Problem It Solves |
-|-------|-------------------|
-| **API Testing with Postman** | Automates API testing and collection management — create workspaces, collections, and run tests programmatically |
-| **ScoutQA Testing** | AI-powered exploratory testing for web applications with automated bug detection and accessibility audits |
+| Category | Power | What It Does |
+|----------|-------|-------------|
+| Design | Design to Code with Figma | Turns Figma designs into production-ready code |
+| Design | Miro Board Context | Uses Miro boards as source of truth for codegen |
+| Deploy | Deploy with Netlify | Deploys React/Next.js/Vue apps to Netlify CDN |
+| Deploy | AWS Amplify | Full-stack apps with Amplify Gen 2 |
+| Deploy | ECS Express Mode | Container → HTTPS endpoint on AWS |
+| Deploy | AWS CDK | Well-architected AWS infrastructure |
+| Deploy | Terraform | Infrastructure as Code with Terraform |
+| Deploy | AWS SAM | Serverless Application Model |
+| Backend | Supabase | Postgres, auth, storage, real-time |
+| Backend | Aurora PostgreSQL | Aurora-specific best practices |
+| Backend | Neon | Serverless Postgres with branching |
+| AI | Strands Agent SDK | Build AI agents with various LLM providers |
+| AI | Bedrock AgentCore | Build and deploy agents on AWS |
+| Security | Snyk | Scan AI-generated code for vulnerabilities |
+| Security | Checkmarx | SAST, secrets, IaC, container scanning |
+| Security | IAM Policy Autopilot | Auto-generate least-privilege IAM policies |
+| Observability | AWS Observability | CloudWatch, Metrics, Alarms, Traces |
+| Observability | Datadog | Logs, metrics, traces from Datadog |
+| Testing | Postman | Automated API testing |
+| Testing | ScoutQA | AI-powered exploratory testing |
+| Payments | Stripe | Payment integrations |
+| Migration | Graviton Migration | Arm64 compatibility analysis |
 
 ---
 
@@ -409,9 +425,9 @@ Below is a selection of powers available in the [Kiro Powers catalog](https://ki
 | Steering Docs | [kiro.dev/docs/steering](https://kiro.dev/docs/steering/) |
 | Specs Docs | [kiro.dev/docs/specs](https://kiro.dev/docs/specs/) |
 | Hooks Docs | [kiro.dev/docs/hooks](https://kiro.dev/docs/hooks/) |
-| Authentication Guide | [kiro.dev/docs/getting-started/authentication](https://kiro.dev/docs/getting-started/authentication/) |
-| Workshop | [catalog.workshops.aws/kiro-immersion](https://catalog.workshops.aws/kiro-immersion/en-US/20-steering/21-generate-steering) |
+| Auth Guide | [kiro.dev/docs/getting-started/authentication](https://kiro.dev/docs/getting-started/authentication/) |
+| Workshop | [catalog.workshops.aws/kiro-immersion](https://catalog.workshops.aws/kiro-immersion/en-US/00-introduction) |
 | Living Spec Power | [github.com/tomasmihalyi/living-spec-power](https://github.com/tomasmihalyi/living-spec-power) |
-| Discord Community | [discord.gg/kirodotdev](https://discord.gg/kirodotdev) |
+| Discord | [discord.gg/kirodotdev](https://discord.gg/kirodotdev) |
 | Report a Bug | [github.com/kirodotdev/Kiro/issues](https://github.com/kirodotdev/Kiro/issues/new/choose) |
-| Enterprise Info | [kiro.dev/enterprise](https://kiro.dev/enterprise/) |
+| Enterprise | [kiro.dev/enterprise](https://kiro.dev/enterprise/) |
